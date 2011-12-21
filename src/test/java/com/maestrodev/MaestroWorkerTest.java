@@ -47,15 +47,7 @@ public class MaestroWorkerTest
         };
         thread.start();
         
-        int test = 0;
-        while(!broker.isStarted()){
-            Thread.sleep(1000); 
-            if(test > 5){ 
-                throw new Exception("Waiting for broker timed out!"); 
-            }
-            test++;
-        }
-
+        Thread.sleep(5000);
         
         super.setUp();
     }
@@ -98,7 +90,9 @@ public class MaestroWorkerTest
 
         JSONObject workitem = new JSONObject();
 
-        MaestroWorker worker = new MaestroWorker(workitem, config);
+        MaestroWorker worker = new MaestroWorker();
+        worker.setWorkitem(workitem);
+        worker.setStompConfig(config);
 
 
         Stomp stomp = new Stomp("localhost", 61619);

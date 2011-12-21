@@ -18,11 +18,14 @@ public class MaestroWorker
 {
     private JSONObject workitem;
     private HashMap stompConfig;
+
+
     
-    public MaestroWorker(JSONObject workitem, HashMap stompConfig){
-        this.workitem = workitem;
-        this.stompConfig = stompConfig;
+    public MaestroWorker(){
+        this.workitem = null;
+        this.stompConfig = null;
     }
+    
     
     /**
      * Helper that sends output strings to server for persistence.
@@ -71,6 +74,30 @@ public class MaestroWorker
         ((JSONObject)getWorkitem().get("fields")).put("__error__", error);
     }
     
+    
+    /**
+     * Helper method for getting the fields
+     * 
+     * @param field key to get value for
+     * @return field value
+     */
+    public String getField(String field){
+        if(((JSONObject)getWorkitem().get("fields")).get(field) == null){
+            return null;
+        }
+        return ((JSONObject)getWorkitem().get("fields")).get(field).toString();
+        
+    }
+    
+    /**
+     * Helper method for getting the fields
+     * 
+     * @return fields set
+     */
+    public JSONObject getFields(){
+        return ((JSONObject)getWorkitem().get("fields"));
+    }
+    
     /**
      * getter for accessing the Workitem
      * 
@@ -89,5 +116,11 @@ public class MaestroWorker
         this.workitem = workitem;
     }
     
-    
+    public HashMap getStompConfig() {
+        return stompConfig;
+    }
+
+    public void setStompConfig(HashMap stompConfig) {
+        this.stompConfig = stompConfig;
+    }
 }
