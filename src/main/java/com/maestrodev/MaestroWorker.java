@@ -1,14 +1,20 @@
 package com.maestrodev;
 
+import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import org.fusesource.hawtbuf.Buffer;
 import java.util.HashMap;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import org.fusesource.stomp.client.BlockingConnection;
 import org.fusesource.stomp.client.Stomp;
 import org.fusesource.stomp.codec.StompFrame;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import static org.fusesource.stomp.client.Constants.*;
+import org.json.simple.parser.ParseException;
 
 /**
  * Main Class for Maestro Plugins written in Java.
@@ -25,6 +31,8 @@ public class MaestroWorker
         this.workitem = null;
         this.stompConfig = null;
     }
+    
+    
     
     
     /**
@@ -88,6 +96,21 @@ public class MaestroWorker
         return ((JSONObject)getWorkitem().get("fields")).get(field).toString();
         
     }
+    
+    public Map perform(String methodName, Map workitem) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException{
+        JSONParser parser = new JSONParser();
+        String json = JSONObject.toJSONString(workitem);
+        setWorkitem((JSONObject)parser.parse(json));
+        
+        Method method = getClass().getMethod(methodName);
+        method.invoke(this);
+        
+        
+        return getWorkitem();             
+        
+    }
+            
+            
     
     /**
      * Helper method for getting the fields
