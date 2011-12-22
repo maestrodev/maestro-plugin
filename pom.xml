@@ -7,6 +7,16 @@
   <version>1.0-SNAPSHOT</version>
   <name>maestro-plugin</name>
   <url>http://maven.apache.org</url>
+  <distributionManagement>
+    <repository>
+      <id>maestro</id>
+      <url>https://repo.maestrodev.com/archiva/repository/com.maestrodev.lucee.releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>maestro</id>
+      <url>https://repo.maestrodev.com/archiva/repository/com.maestrodev.lucee.snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
