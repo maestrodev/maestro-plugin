@@ -7,7 +7,6 @@ import org.fusesource.hawtbuf.Buffer;
 import java.util.HashMap;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
 import org.fusesource.stomp.client.BlockingConnection;
 import org.fusesource.stomp.client.Stomp;
 import org.fusesource.stomp.codec.StompFrame;
@@ -40,12 +39,14 @@ public class MaestroWorker
      * 
      * @param output - Message to be persisted for the associated TaskExecution
      */
-    public void writeOutput(String output) throws IOException, URISyntaxException{
-        BlockingConnection connection = getConnection();
-        
-        sendStringWithConnection(output, connection);
+    public void writeOutput(String output){
+        try{
+            BlockingConnection connection = getConnection();
 
-        closeConnectionAndCleanup(connection);
+            sendStringWithConnection(output, connection);
+
+            closeConnectionAndCleanup(connection);
+        }catch(Exception e){}
     }
     
     private void sendStringWithConnection(String output, BlockingConnection connection) throws IOException{
