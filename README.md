@@ -12,16 +12,9 @@ This is a simple example that shows how to create an IRC plugin in Java. The exa
 
 The first step is to create a Maven Java Application Project. Select New Project from the File menu.  Then Choose Maven - Java Application.
 
-![alt text](http://d.pr/UyeY+ "Create a netbeans project")
-
-
 Enter your project Information, in this case the project is maestro-irc-plugin, set the location to create the project, and the maven project attributes.
 
-![alt text](http://d.pr/12Zv+ "Create a netbeans project")
-
-This will create a file structure similar to below.  You can rename the templated Source and Test files to IrcWorker and IrcWorkerTest.  The pom.xml and settings.xml file are created similarly.
-
-![alt text](http://d.pr/bO5h+ "Create a netbeans project")
+This will create a file structure skeleton.  You can rename the templated Source and Test files to IrcWorker and IrcWorkerTest.  The pom.xml and settings.xml file are created similarly.
 
 
 ### Adding Dependencies ###
