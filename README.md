@@ -329,13 +329,13 @@ The testIrcWorker method has a simple example of how the worker will be used whe
   ],
   "task":{
     "command" : "/irc/postMessage",    
-    "inputs" : {"body" : {"value" : "", "type" : "String", "required" : "true"},
-		"nickname":{"value" : "", "type" : "String", "required" : "true"},
-		"server":{"value" : "", "type" : "String", "required" : "true"},
-		"password":{"value" : "", "type" : "Password", "required" : "false"},
-		"ssl":{"value" : "", "type" : "Boolean", "required" : "true"},
-		"port":{"value" : "", "type" : "Integer", "required" : "true"},
-		"channel":{"value" : "", "type" : "String", "required" : "true"}															
+    "inputs" : {"body" : {"value" : "", "type" : "String", "required" : true},
+		"nickname":{"value" : "", "type" : "String", "required" : true},
+		"server":{"value" : "", "type" : "String", "required" : true},
+		"password":{"value" : "", "type" : "Password", "required" : false},
+		"ssl":{"value" : "", "type" : "Boolean", "required" : true},
+		"port":{"value" : "", "type" : "Integer", "required" : true},
+		"channel":{"value" : "", "type" : "String", "required" : true}															
 	},
     "outputs" : {},
     "tool_name":"Notification"
