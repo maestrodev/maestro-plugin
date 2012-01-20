@@ -3,8 +3,9 @@ package com.maestrodev;
 import java.util.Map;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.fusesource.hawtbuf.Buffer;
-import java.util.HashMap;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import org.fusesource.stomp.client.BlockingConnection;
@@ -22,7 +23,7 @@ import org.json.simple.parser.ParseException;
 public class MaestroWorker 
 {
     private JSONObject workitem;
-    private HashMap stompConfig;
+    private Map stompConfig;
 
 
     
@@ -41,19 +42,23 @@ public class MaestroWorker
      */
     public void writeOutput(String output){
         try{
+            
             BlockingConnection connection = getConnection();
+            
 
             sendStringWithConnection(output, connection);
 
             closeConnectionAndCleanup(connection);
-        }catch(Exception e){}
+        }catch(Exception e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+        }
     }
     
     private void sendStringWithConnection(String output, BlockingConnection connection) throws IOException{
         this.workitem.put("__output__", output);
         this.workitem.put("__streaming__", true);
         StompFrame frame = new StompFrame(SEND);
-        frame.addHeader(DESTINATION, StompFrame.encodeHeader((String)this.stompConfig.get("queue")));
+        frame.addHeader(DESTINATION, StompFrame.encodeHeader(this.stompConfig.get("queue").toString()));
         Buffer buffer = new Buffer(this.workitem.toJSONString().getBytes());
         frame.content(buffer);
 
@@ -62,7 +67,7 @@ public class MaestroWorker
     
     private BlockingConnection getConnection()throws IOException, URISyntaxException{
         
-        Stomp stomp = new Stomp(this.stompConfig.get("host").toString(), Integer.parseInt((String)this.stompConfig.get("port")));
+        Stomp stomp = new Stomp(this.stompConfig.get("host").toString(), Integer.parseInt(this.stompConfig.get("port").toString()));
         BlockingConnection connection = stomp.connectBlocking();
         
         return connection;
@@ -140,11 +145,11 @@ public class MaestroWorker
         this.workitem = workitem;
     }
     
-    public HashMap getStompConfig() {
+    public Map getStompConfig() {
         return stompConfig;
     }
 
-    public void setStompConfig(HashMap stompConfig) {
+    public void setStompConfig(Map stompConfig) {
         this.stompConfig = stompConfig;
     }
 }
