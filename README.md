@@ -8,9 +8,9 @@ Develop a Maestro 4 plugin
 
 This is a simple example that shows how to create an IRC plugin in Java. The example uses netbeans for code editing and to add dependencies.
 
-### Create a Maven Java ###
+### Create a Maven Java Application Project ###
 
-The first step is to create a Maven Java Application Project. Select New Project from the File menu.  Then Choose Maven - Java Application.
+The first step is to create a Maven Java Application Project using Netbeans. Select New Project from the File menu.  Then Choose Maven - Java Application.
 
 Enter your project Information, in this case the project is maestro-irc-plugin, set the location to create the project, and the maven project attributes.
 
@@ -19,7 +19,7 @@ This will create a file structure skeleton.  You can rename the templated Source
 
 ### Adding Dependencies ###
 
-The Irc Plugin project needs to include the the maestro-plugin project and any other dependency in it's pom.xml file.  In this case we are using the irclib library for Irc functionality.  The irclib library has several dependencies of it's own which are listed in the project explorer below.
+A Maestro 4 project needs to include the maestro-plugin project and any other dependency in it's pom.xml file.  In this case we are using the irclib library for Irc functionality.  The irclib library has several dependencies of it's own as well.
 
 #### pom.xml ####
 ```xml
@@ -69,7 +69,7 @@ The Irc Plugin project needs to include the the maestro-plugin project and any o
 
 ### Creating the Worker ###
 
-The source consists of the IrcWorker class and the IrcEventListener class which, as you can tell by the name, is required by the irclib for IRC event handling.
+The source consists of the IrcWorker class and the IrcEventListener class which, as you can tell by the name, is required by the irclib for IRC event handling.  The Worker suffix on the class name is convention and not required.
 
 #### IrcWorker ####
 
@@ -123,7 +123,7 @@ The source consists of the IrcWorker class and the IrcEventListener class which,
   }
 ```
 
-IrcWorker is a simple class with a no argument constructor and a method called postMessage.  postMessage creates a new IRCConnection object with field values provided (I will explain how to define those in a bit).  The getField method is used to access value inside the current compositions run context.  The connection is created, connected and the method waits for the message to be sent.  A call to writeOutput will put the message "The Message Was Sent!" into the composition runs output stream and stored for access.  Finally the connection to the irc server is closed.
+IrcWorker is a simple pojo with a method called postMessage.  The method postMessage creates a new IRCConnection object with field values provided (I will explain how to define those in a bit).  The getField method is used to access value inside the current compositions run context.  The connection is created, connected and the method waits for the message to be sent.  A call to writeOutput will put the message "The Message Was Sent!" into the composition runs output stream and stored for access.  Finally the connection to the irc server is closed.
 
 
 #### IrcEventListener ####
@@ -329,13 +329,13 @@ The testIrcWorker method has a simple example of how the worker will be used whe
   ],
   "task":{
     "command" : "/irc/postMessage",    
-    "inputs" : {"body" : {"value" : "", "type" : "String", "required" : "true"},
-		"nickname":{"value" : "", "type" : "String", "required" : "true"},
-		"server":{"value" : "", "type" : "String", "required" : "true"},
-		"password":{"value" : "", "type" : "Password", "required" : "false"},
-		"ssl":{"value" : "", "type" : "Boolean", "required" : "true"},
-		"port":{"value" : "", "type" : "Integer", "required" : "true"},
-		"channel":{"value" : "", "type" : "String", "required" : "true"}															
+    "inputs" : {"body" : {"value" : "", "type" : "String", "required" : true},
+		"nickname":{"value" : "", "type" : "String", "required" : true},
+		"server":{"value" : "", "type" : "String", "required" : true},
+		"password":{"value" : "", "type" : "Password", "required" : false},
+		"ssl":{"value" : "", "type" : "Boolean", "required" : true},
+		"port":{"value" : "", "type" : "Integer", "required" : true},
+		"channel":{"value" : "", "type" : "String", "required" : true}															
 	},
     "outputs" : {},
     "tool_name":"Notification"
@@ -344,7 +344,7 @@ The testIrcWorker method has a simple example of how the worker will be used whe
 
 ```
 
-Note that the json object is an array of hash objects, this allows you to include more than one plugin inside a manifest and zip package.
+Note that the json object is an array of hash objects, this allows you to include more than one method endpoint inside a manifest for a plugin package.
 
 * name - Name of the plugin, that is display in the Maestro 4 UI
 * description - Description of the plugin that is displayed 
