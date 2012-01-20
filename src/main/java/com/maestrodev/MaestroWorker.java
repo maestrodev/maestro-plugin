@@ -49,6 +49,10 @@ public class MaestroWorker
             sendStringWithConnection(output, connection);
 
             closeConnectionAndCleanup(connection);
+        }catch(NullPointerException e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
+                    "Missing Stomp Configuration,"+
+                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
         }catch(Exception e){
             Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
         }
