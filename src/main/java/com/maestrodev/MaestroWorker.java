@@ -32,7 +32,50 @@ public class MaestroWorker
         this.stompConfig = null;
     }
     
-    
+    /**
+     * Helper that sends cancel message that stops composition execution.
+     * 
+     */
+     public void cancel() {
+        try{
+            
+            BlockingConnection connection = getConnection();
+            
+
+            sendCancelWithConnection(connection);
+
+            closeConnectionAndCleanup(connection);
+        }catch(NullPointerException e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
+                    "Missing Stomp Configuration,"+
+                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
+        }catch(Exception e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+     
+     /**
+     * Puts the current task run in a waiting state or allows it to continue
+     * 
+     * @param waiting - Will I wait or won't I?
+     */
+    public void setWaiting(boolean waiting) {
+        try{
+            
+            BlockingConnection connection = getConnection();
+            
+
+            sendWaitingWithConnection(waiting, connection);
+
+            closeConnectionAndCleanup(connection);
+        }catch(NullPointerException e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
+                    "Missing Stomp Configuration,"+
+                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
+        }catch(Exception e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
     
     
     /**
@@ -58,15 +101,31 @@ public class MaestroWorker
         }
     }
     
+    
+    private void sendWaitingWithConnection(boolean waiting, BlockingConnection connection) throws IOException{
+        this.workitem.put("__waiting__", waiting);
+        this.sendCurrentWorkitem(connection);
+    }
+    
+    private void sendCancelWithConnection(BlockingConnection connection) throws IOException{
+        this.workitem.put("__cancel__", true);
+        this.sendCurrentWorkitem(connection);
+    }    
+    
     private void sendStringWithConnection(String output, BlockingConnection connection) throws IOException{
         this.workitem.put("__output__", output);
         this.workitem.put("__streaming__", true);
+        this.sendCurrentWorkitem(connection);
+    }
+    
+    private void sendCurrentWorkitem(BlockingConnection connection) throws IOException{
         StompFrame frame = new StompFrame(SEND);
         frame.addHeader(DESTINATION, StompFrame.encodeHeader(this.stompConfig.get("queue").toString()));
         Buffer buffer = new Buffer(this.workitem.toJSONString().getBytes());
         frame.content(buffer);
 
         connection.send(frame);
+        
     }
     
     private BlockingConnection getConnection()throws IOException, URISyntaxException{
@@ -78,9 +137,16 @@ public class MaestroWorker
     }
 
     private void closeConnectionAndCleanup(BlockingConnection connection) throws IOException{
+        connection.suspend();
         connection.close();
+        
         this.workitem.remove("__output__");
         this.workitem.remove("__streaming__");
+        this.workitem.remove("__cancel__");
+        if(this.workitem.get("__waiting__") != null && Boolean.getBoolean(
+            this.workitem.get("__waiting__").toString()) == false){
+            this.workitem.remove("__waiting__");
+        }
     }
     
     /**
@@ -156,4 +222,6 @@ public class MaestroWorker
     public void setStompConfig(Map stompConfig) {
         this.stompConfig = stompConfig;
     }
+
+   
 }
