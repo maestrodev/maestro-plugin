@@ -55,7 +55,7 @@ public class MaestroWorkerTest
     @Override
     protected void tearDown() throws Exception {
         broker.stop();
-        Thread.sleep(15000);
+        Thread.sleep(1000);
         super.tearDown();
     }
     
@@ -81,44 +81,44 @@ public class MaestroWorkerTest
     /**
      * 
      */
-//    public void testWriteOutput() throws IOException, URISyntaxException, ParseException
-//    {
-//
-//        HashMap config = new HashMap();
-//        config.put("host", "localhost");
-//        config.put("port", "61619");
-//        config.put("queue", "/queue/test");
-//
-//        JSONObject workitem = new JSONObject();
-//
-//        MaestroWorker worker = new MaestroWorker();
-//        worker.setWorkitem(workitem);
-//        worker.setStompConfig(config);
-//
-//
-//        Stomp stomp = new Stomp("localhost", 61619);
-//        BlockingConnection connection = stomp.connectBlocking();
-//
-//
-//        StompFrame frame = new StompFrame(SUBSCRIBE);
-//        frame.addHeader(DESTINATION, StompFrame.encodeHeader("/queue/test"));
-//        frame.addHeader(ID, connection.nextId());
-//        StompFrame response = connection.request(frame);
-//
-//        // This unblocks once the response frame is received.
-//        assertNotNull(response);
-//
-//        worker.writeOutput("Hello Maestro Plugin!");
-//
-//        // Try to get the received message.
-//        StompFrame received = connection.receive();
-//        assertTrue(received.action().equals(MESSAGE));
-//        JSONParser parser = new JSONParser();
-//        
-//        workitem = (JSONObject) parser.parse(received.content().ascii().toString());
-//        assertTrue(workitem.get("__output__").equals("Hello Maestro Plugin!"));
-//       
-//    }
+    public void testWriteOutput() throws IOException, URISyntaxException, ParseException
+    {
+
+        HashMap config = new HashMap();
+        config.put("host", "localhost");
+        config.put("port", "61619");
+        config.put("queue", "/queue/test");
+
+        JSONObject workitem = new JSONObject();
+
+        MaestroWorker worker = new MaestroWorker();
+        worker.setWorkitem(workitem);
+        worker.setStompConfig(config);
+
+
+        Stomp stomp = new Stomp("localhost", 61619);
+        BlockingConnection connection = stomp.connectBlocking();
+
+
+        StompFrame frame = new StompFrame(SUBSCRIBE);
+        frame.addHeader(DESTINATION, StompFrame.encodeHeader("/queue/test"));
+        frame.addHeader(ID, connection.nextId());
+        StompFrame response = connection.request(frame);
+
+        // This unblocks once the response frame is received.
+        assertNotNull(response);
+
+        worker.writeOutput("Hello Maestro Plugin!");
+
+        // Try to get the received message.
+        StompFrame received = connection.receive();
+        assertTrue(received.action().equals(MESSAGE));
+        JSONParser parser = new JSONParser();
+        
+        workitem = (JSONObject) parser.parse(received.content().ascii().toString());
+        assertTrue(workitem.get("__output__").equals("Hello Maestro Plugin!"));
+       
+    }
     
         /**
      * 
@@ -161,46 +161,46 @@ public class MaestroWorkerTest
         assertTrue(workitem.get("__cancel__").equals(true));
        
     }
-//    
-//        /**
-//     * 
-//     */
-//    public void testSetWaiting() throws IOException, URISyntaxException, ParseException
-//    {
-//
-//        HashMap config = new HashMap();
-//        config.put("host", "localhost");
-//        config.put("port", "61619");
-//        config.put("queue", "/queue/test");
-//
-//        JSONObject workitem = new JSONObject();
-//
-//        MaestroWorker worker = new MaestroWorker();
-//        worker.setWorkitem(workitem);
-//        worker.setStompConfig(config);
-//
-//
-//        Stomp stomp = new Stomp("localhost", 61619);
-//        BlockingConnection connection = stomp.connectBlocking();
-//
-//
-//        StompFrame frame = new StompFrame(SUBSCRIBE);
-//        frame.addHeader(DESTINATION, StompFrame.encodeHeader("/queue/test"));
-//        frame.addHeader(ID, connection.nextId());
-//        StompFrame response = connection.request(frame);
-//
-//        // This unblocks once the response frame is received.
-//        assertNotNull(response);
-//
-//        worker.setWaiting(true);
-//
-//        // Try to get the received message.
-//        StompFrame received = connection.receive();
-//        assertTrue(received.action().equals(MESSAGE));
-//        JSONParser parser = new JSONParser();
-//        
-//        workitem = (JSONObject) parser.parse(received.content().ascii().toString());
-//        assertTrue(workitem.get("__waiting__").equals(true));
-//    }
+    
+        /**
+     * 
+     */
+    public void testSetWaiting() throws IOException, URISyntaxException, ParseException
+    {
+
+        HashMap config = new HashMap();
+        config.put("host", "localhost");
+        config.put("port", "61619");
+        config.put("queue", "/queue/test");
+
+        JSONObject workitem = new JSONObject();
+
+        MaestroWorker worker = new MaestroWorker();
+        worker.setWorkitem(workitem);
+        worker.setStompConfig(config);
+
+
+        Stomp stomp = new Stomp("localhost", 61619);
+        BlockingConnection connection = stomp.connectBlocking();
+
+
+        StompFrame frame = new StompFrame(SUBSCRIBE);
+        frame.addHeader(DESTINATION, StompFrame.encodeHeader("/queue/test"));
+        frame.addHeader(ID, connection.nextId());
+        StompFrame response = connection.request(frame);
+
+        // This unblocks once the response frame is received.
+        assertNotNull(response);
+
+        worker.setWaiting(true);
+
+        // Try to get the received message.
+        StompFrame received = connection.receive();
+        assertTrue(received.action().equals(MESSAGE));
+        JSONParser parser = new JSONParser();
+        
+        workitem = (JSONObject) parser.parse(received.content().ascii().toString());
+        assertTrue(workitem.get("__waiting__").equals(true));
+    }
 
 }
