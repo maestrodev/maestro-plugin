@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import org.fusesource.hawtbuf.Buffer;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import org.apache.commons.lang3.StringUtils;
 import org.fusesource.stomp.client.BlockingConnection;
 import org.fusesource.stomp.client.Stomp;
 import org.fusesource.stomp.codec.StompFrame;
@@ -39,10 +40,9 @@ public class MaestroWorker
      public void cancel() {
         try{
             
-            BlockingConnection connection = getConnection();
-            
-
-            sendCancelWithConnection(connection);
+            String [] fields = {"__cancel__"};
+            String [] values = {String.valueOf(true)};
+            BlockingConnection connection = sendFieldsWithValues(fields, values);
 
             closeConnectionAndCleanup(connection);
         }catch(NullPointerException e){
@@ -62,10 +62,9 @@ public class MaestroWorker
     public void setWaiting(boolean waiting) {
         try{
             
-            BlockingConnection connection = getConnection();
-            
-
-            sendWaitingWithConnection(waiting, connection);
+            String [] fields = {"__waiting__"};
+            String [] values = {String.valueOf(waiting)};
+            BlockingConnection connection = sendFieldsWithValues(fields, values);
 
             closeConnectionAndCleanup(connection);
         }catch(NullPointerException e){
@@ -86,10 +85,9 @@ public class MaestroWorker
     public void writeOutput(String output){
         try{
             
-            BlockingConnection connection = getConnection();
-            
-
-            sendStringWithConnection(output, connection);
+            String [] fields = {"__output__","__streaming__"};
+            String [] values = {output, String.valueOf(true)};
+            BlockingConnection connection = sendFieldsWithValues(fields, values);
 
             closeConnectionAndCleanup(connection);
         }catch(NullPointerException e){
@@ -101,21 +99,19 @@ public class MaestroWorker
         }
     }
     
-    
-    private void sendWaitingWithConnection(boolean waiting, BlockingConnection connection) throws IOException{
-        this.workitem.put("__waiting__", waiting);
+    private BlockingConnection sendFieldsWithValues(String [] fields, String [] values) throws Exception {
+        BlockingConnection connection = this.getConnection();
+        if(fields.length != values.length){
+            throw new Exception("Mismatched Field and Value Sets fields.length != values.length" );
+        }
+        
+        for(int ii = 0 ; ii < fields.length ; ++ii){
+            this.workitem.put(fields[ii], values[ii]);
+        }
+        
         this.sendCurrentWorkitem(connection);
-    }
-    
-    private void sendCancelWithConnection(BlockingConnection connection) throws IOException{
-        this.workitem.put("__cancel__", true);
-        this.sendCurrentWorkitem(connection);
-    }    
-    
-    private void sendStringWithConnection(String output, BlockingConnection connection) throws IOException{
-        this.workitem.put("__output__", output);
-        this.workitem.put("__streaming__", true);
-        this.sendCurrentWorkitem(connection);
+        
+        return connection;
     }
     
     private void sendCurrentWorkitem(BlockingConnection connection) throws IOException{
@@ -223,5 +219,76 @@ public class MaestroWorker
         this.stompConfig = stompConfig;
     }
 
-   
+    
+    /*
+     * Database 
+     */
+    
+    public void setFieldsInRecord(String model, String nameOrId, String field, String value) {
+        try{
+            
+            String [] fields = {"__persist__", "__update__", "__model__", "__record_id__", "__record_field__", "__record_value__"};
+            String [] values = {String.valueOf(true), String.valueOf(true), model, nameOrId, field, value};
+            BlockingConnection connection = sendFieldsWithValues(fields, values);
+
+            closeConnectionAndCleanup(connection, fields);
+            
+            
+        }catch(NullPointerException e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
+                    "Missing Stomp Configuration,"+
+                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
+        }catch(Exception e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    private void closeConnectionAndCleanup(BlockingConnection connection, String [] fields) throws Exception {
+        this.closeConnectionAndCleanup(connection);
+        for(String field : fields){
+            this.workitem.remove(field);
+        }
+    }
+
+    void createRecordWithFields(String model, String[] recordFields, String[] recordValues) {
+         try{
+            
+            String [] fields = {"__persist__", "__create__", "__model__", "__record_fields__", "__record_values__"};
+            String [] values = {String.valueOf(true), String.valueOf(true), model, StringUtils.join(recordFields, ","), StringUtils.join(recordValues, ",")};
+            BlockingConnection connection = sendFieldsWithValues(fields, values);
+
+            closeConnectionAndCleanup(connection, fields);
+            
+            
+        }catch(NullPointerException e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
+                    "Missing Stomp Configuration,"+
+                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
+        }catch(Exception e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    void deleteRecord(String model, String nameOrId) {
+        try{
+            
+            String [] fields = {"__persist__", "__delete__", "__model__", "__name__"};
+            String [] values = {String.valueOf(true), String.valueOf(true), model, nameOrId};
+            BlockingConnection connection = sendFieldsWithValues(fields, values);
+
+            closeConnectionAndCleanup(connection, fields);
+            
+            
+        }catch(NullPointerException e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
+                    "Missing Stomp Configuration,"+
+                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
+        }catch(Exception e){
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+   /*
+    * End Database 
+    */
 }
