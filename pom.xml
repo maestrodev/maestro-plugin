@@ -9,11 +9,11 @@
   <url>http://maven.apache.org</url>
   <distributionManagement>
     <repository>
-      <id>maestro</id>
+      <id>maestro-deploy</id>
       <url>https://repo.maestrodev.com/archiva/repository/com.maestrodev.lucee.releases</url>
     </repository>
     <snapshotRepository>
-      <id>maestro</id>
+      <id>maestro-deploy</id>
       <url>https://repo.maestrodev.com/archiva/repository/com.maestrodev.lucee.snapshots</url>
     </snapshotRepository>
   </distributionManagement>
