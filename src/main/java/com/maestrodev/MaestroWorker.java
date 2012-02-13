@@ -170,16 +170,21 @@ public class MaestroWorker
     }
     
     public Map perform(String methodName, Map workitem) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException{
-        JSONParser parser = new JSONParser();
-        String json = JSONObject.toJSONString(workitem);
-        setWorkitem((JSONObject)parser.parse(json));
+        try{
+            JSONParser parser = new JSONParser();
+            String json = JSONObject.toJSONString(workitem);
+            setWorkitem((JSONObject)parser.parse(json));
+
+            Method method = getClass().getMethod(methodName);
+            method.invoke(this);
+
+
         
-        Method method = getClass().getMethod(methodName);
-        method.invoke(this);
-        
-        
+        } catch (Exception e) {
+            this.writeOutput("Task Failed: " + e.toString());
+            this.setError("Task Failed: " + e.toString());
+        }
         return getWorkitem();             
-        
     }
             
             
