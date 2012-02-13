@@ -229,7 +229,7 @@ public class MaestroWorker
      * Database 
      */
     
-    public void setFieldsInRecord(String model, String nameOrId, String field, String value) {
+    public void updateFieldsInRecord(String model, String nameOrId, String field, String value) {
         try{
             
             String [] fields = {"__persist__", "__update__", "__model__", "__record_id__", "__record_field__", "__record_value__"};

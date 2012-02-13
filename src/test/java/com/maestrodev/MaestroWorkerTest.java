@@ -208,7 +208,7 @@ public class MaestroWorkerTest
      /**
      * 
      */
-    public void testSetFieldsInRecord() throws IOException, URISyntaxException, ParseException
+    public void testUpdateFieldsInRecord() throws IOException, URISyntaxException, ParseException
     {
 
         HashMap config = new HashMap();
@@ -235,7 +235,7 @@ public class MaestroWorkerTest
         // This unblocks once the response frame is received.
         assertNotNull(response);
 
-        worker.setFieldsInRecord("model", "name or id", "field", "value");
+        worker.updateFieldsInRecord("model", "name or id", "field", "value");
 
         // Try to get the received message.
         StompFrame received = connection.receive();
