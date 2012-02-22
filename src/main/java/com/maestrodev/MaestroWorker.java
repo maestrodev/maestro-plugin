@@ -122,6 +122,12 @@ public class MaestroWorker
 
         connection.send(frame);
         
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
     
     private BlockingConnection getConnection()throws IOException, URISyntaxException{
