@@ -373,3 +373,18 @@ maestro-irc-plugin.zip
 
 This will take the dependencies inside the jar and load them as well as the maestro-irc-plugin-1.0-SNAPSHOT.jar that is created from the above example.
 
+#### Where to put the plugins ####
+
+By default luCEE will look for plugins in ```~/.maestro/plugins``` but it can be overriden in ```maestro_lucee.json``` with
+
+```
+{
+  "lucee": {
+    "plugins" : {
+      "install_path" : "/tmp/maestro-lucee"
+     }
+  }
+}
+```
+
+On startup luCEE will print a debug log with the resolved plugin location ```Deploying Plugins From ...```
