@@ -120,6 +120,24 @@ public class MaestroWorkerTest
        
     }
     
+    
+    public void testSetField() throws IOException, URISyntaxException, ParseException
+    {
+
+        
+
+        JSONObject workitem = new JSONObject();
+        JSONObject fields = new JSONObject();
+        workitem.put("fields", fields);
+        
+        MaestroWorker worker = new MaestroWorker();
+        worker.setWorkitem(workitem);
+        
+        worker.setField("some field", "some value");
+       
+        assertEquals(worker.getField("some field"), "some value");
+    }
+    
         /**
      * 
      */

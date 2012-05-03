@@ -205,6 +205,16 @@ public class MaestroWorker
     }
     
     /**
+     * Helper method for setting fields
+     * @param name string key field name
+     * @param value string value to apply to field
+     * 
+     */
+    public void setField(String name, String value){
+        ((JSONObject)getWorkitem().get("fields")).put(name, value);
+    }
+    
+    /**
      * getter for accessing the Workitem
      * 
      * @return Map of Workitem values
