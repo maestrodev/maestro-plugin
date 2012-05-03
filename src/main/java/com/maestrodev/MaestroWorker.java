@@ -160,7 +160,13 @@ public class MaestroWorker
         ((JSONObject)getWorkitem().get("fields")).put("__error__", error);
     }
     
-    
+    /**
+     * Helper method for getting the error field
+     */
+    public String getError(){
+        return getField( "__error__" );
+    }
+
     /**
      * Helper method for getting the fields
      * 
