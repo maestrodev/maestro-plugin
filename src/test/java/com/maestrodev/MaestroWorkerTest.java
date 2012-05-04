@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
@@ -42,7 +40,7 @@ public class MaestroWorkerTest
                     broker.setBrokerName("test_broker");
                     broker.start();
                 } catch (Exception ex) {
-                    Logger.getLogger(MaestroWorkerTest.class.getName()).log(Level.SEVERE, "Unable To Create Broker", ex);
+                    throw new RuntimeException( "Unable To Create Broker", ex );
                 }
             
             }
