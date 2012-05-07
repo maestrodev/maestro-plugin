@@ -1,2 +1,5 @@
 activemq*
 target
+/.settings/*
+/.classpath
+/.project
