@@ -3,9 +3,7 @@ package com.maestrodev;
 import static org.fusesource.stomp.client.Constants.*;
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 
 import org.apache.activemq.broker.BrokerService;
@@ -15,7 +13,6 @@ import org.fusesource.stomp.client.Stomp;
 import org.fusesource.stomp.codec.StompFrame;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +56,7 @@ public class MaestroWorkerTest
     }
 
     @Test
-    public void testWriteOutput() throws IOException, URISyntaxException, ParseException
+    public void testWriteOutput() throws Exception
     {
 
         HashMap config = new HashMap();
@@ -99,7 +96,7 @@ public class MaestroWorkerTest
     }
     
     @Test
-    public void testSetField() throws IOException, URISyntaxException, ParseException
+    public void testSetField() throws Exception
     {
 
         
@@ -117,7 +114,7 @@ public class MaestroWorkerTest
     }
     
     @Test
-    public void testCancel() throws IOException, URISyntaxException, ParseException
+    public void testCancel() throws Exception
     {
 
         HashMap config = new HashMap();
@@ -157,7 +154,7 @@ public class MaestroWorkerTest
     }
 
     @Test
-    public void testSetWaiting() throws IOException, URISyntaxException, ParseException
+    public void testSetWaiting() throws Exception
     {
 
         HashMap config = new HashMap();
@@ -196,7 +193,7 @@ public class MaestroWorkerTest
     }
 
     @Test
-    public void testUpdateFieldsInRecord() throws IOException, URISyntaxException, ParseException
+    public void testUpdateFieldsInRecord() throws Exception
     {
 
         HashMap config = new HashMap();
@@ -240,7 +237,7 @@ public class MaestroWorkerTest
     }
     
     @Test
-    public void testCreateRecordWithFields() throws IOException, URISyntaxException, ParseException
+    public void testCreateRecordWithFields() throws Exception
     {
 
         HashMap config = new HashMap();
@@ -285,7 +282,7 @@ public class MaestroWorkerTest
     }
     
     @Test
-    public void testDeleteRecord() throws IOException, URISyntaxException, ParseException
+    public void testDeleteRecord() throws Exception
     {
 
         HashMap config = new HashMap();
