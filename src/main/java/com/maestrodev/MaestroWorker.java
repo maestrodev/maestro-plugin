@@ -1,20 +1,23 @@
 package com.maestrodev;
 
-import java.util.Map;
+import static org.fusesource.stomp.client.Constants.*;
+
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.fusesource.hawtbuf.Buffer;
-import java.io.IOException;
-import java.net.URISyntaxException;
+
 import org.apache.commons.lang3.StringUtils;
+import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.stomp.client.BlockingConnection;
 import org.fusesource.stomp.client.Stomp;
 import org.fusesource.stomp.codec.StompFrame;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import static org.fusesource.stomp.client.Constants.*;
 import org.json.simple.parser.ParseException;
 
 /**
@@ -24,14 +27,7 @@ import org.json.simple.parser.ParseException;
 public class MaestroWorker 
 {
     private JSONObject workitem;
-    private Map stompConfig;
-
-
-    
-    public MaestroWorker(){
-        this.workitem = null;
-        this.stompConfig = null;
-    }
+    private Map<String, Object> stompConfig = new HashMap<String, Object>();
     
     /**
      * Helper that sends cancel message that stops composition execution.
@@ -45,10 +41,6 @@ public class MaestroWorker
             BlockingConnection connection = sendFieldsWithValues(fields, values);
 
             closeConnectionAndCleanup(connection);
-        }catch(NullPointerException e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
-                    "Missing Stomp Configuration,"+
-                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
         }catch(Exception e){
             Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -67,10 +59,6 @@ public class MaestroWorker
             BlockingConnection connection = sendFieldsWithValues(fields, values);
 
             closeConnectionAndCleanup(connection);
-        }catch(NullPointerException e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
-                    "Missing Stomp Configuration,"+
-                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
         }catch(Exception e){
             Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -90,10 +78,6 @@ public class MaestroWorker
             BlockingConnection connection = sendFieldsWithValues(fields, values);
 
             closeConnectionAndCleanup(connection);
-        }catch(NullPointerException e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
-                    "Missing Stomp Configuration,"+
-                    " Make Sure Please Make Sure Host, Port And Queue Are Set", e);
         }catch(Exception e){
             Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -115,8 +99,18 @@ public class MaestroWorker
     }
     
     private void sendCurrentWorkitem(BlockingConnection connection) throws IOException{
+
+        Object queue = this.stompConfig.get("queue");
+        if ( queue == null )
+        {
+            Logger.getLogger( MaestroWorker.class.getName() ).log( Level.SEVERE,
+                                                                   "Missing Stomp Configuration,"
+                                                                       + "Make Sure Queue is Set" );
+            return;
+        }
+
         StompFrame frame = new StompFrame(SEND);
-        frame.addHeader(DESTINATION, StompFrame.encodeHeader(this.stompConfig.get("queue").toString()));
+        frame.addHeader(DESTINATION, StompFrame.encodeHeader(queue.toString()));
         Buffer buffer = new Buffer(this.workitem.toJSONString().getBytes());
         frame.content(buffer);
 
@@ -131,16 +125,29 @@ public class MaestroWorker
     }
     
     private BlockingConnection getConnection()throws IOException, URISyntaxException{
-        
-        Stomp stomp = new Stomp(this.stompConfig.get("host").toString(), Integer.parseInt(this.stompConfig.get("port").toString()));
+
+        Object h = this.stompConfig.get( "host" );
+        Object p = this.stompConfig.get( "port" );
+
+        if ( ( h == null ) || ( p == null ) )
+        {
+            Logger.getLogger( MaestroWorker.class.getName() ).log( Level.SEVERE,
+                                                                   "Missing Stomp Configuration,"
+                                                                       + "Make Sure Host and Port Are Set" );
+            return null;
+        }
+
+        Stomp stomp = new Stomp( h.toString(), Integer.parseInt( p.toString() ) );
         BlockingConnection connection = stomp.connectBlocking();
         
         return connection;
     }
 
     private void closeConnectionAndCleanup(BlockingConnection connection) throws IOException{
-        connection.suspend();
-        connection.close();
+        if (connection != null) {
+          connection.suspend();
+          connection.close();
+        }
         
         this.workitem.remove("__output__");
         this.workitem.remove("__streaming__");
@@ -189,8 +196,6 @@ public class MaestroWorker
 
             Method method = getClass().getMethod(methodName);
             method.invoke(this);
-
-
         
         } catch (Exception e) {
             this.writeOutput("Task Failed: " + e.toString());
@@ -238,11 +243,11 @@ public class MaestroWorker
         this.workitem = workitem;
     }
     
-    public Map getStompConfig() {
+    public Map<String, Object> getStompConfig() {
         return stompConfig;
     }
 
-    public void setStompConfig(Map stompConfig) {
+    public void setStompConfig(Map<String, Object> stompConfig) {
         this.stompConfig = stompConfig;
     }
 
@@ -259,12 +264,6 @@ public class MaestroWorker
             BlockingConnection connection = sendFieldsWithValues(fields, values);
 
             closeConnectionAndCleanup(connection, fields);
-            
-            
-        }catch(NullPointerException e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
-                    "Missing Stomp Configuration,"+
-                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
         }catch(Exception e){
             Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -285,12 +284,6 @@ public class MaestroWorker
             BlockingConnection connection = sendFieldsWithValues(fields, values);
 
             closeConnectionAndCleanup(connection, fields);
-            
-            
-        }catch(NullPointerException e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
-                    "Missing Stomp Configuration,"+
-                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
         }catch(Exception e){
             Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -304,12 +297,6 @@ public class MaestroWorker
             BlockingConnection connection = sendFieldsWithValues(fields, values);
 
             closeConnectionAndCleanup(connection, fields);
-            
-            
-        }catch(NullPointerException e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
-                    "Missing Stomp Configuration,"+
-                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
         }catch(Exception e){
             Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
         }
