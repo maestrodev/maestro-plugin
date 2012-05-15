@@ -26,6 +26,8 @@ import org.json.simple.parser.ParseException;
  */
 public class MaestroWorker 
 {
+    private static Logger logger = Logger.getLogger(MaestroWorker.class.getName());
+
     private JSONObject workitem;
     private Map<String, Object> stompConfig = new HashMap<String, Object>();
     
@@ -42,7 +44,7 @@ public class MaestroWorker
 
             closeConnectionAndCleanup(connection);
         }catch(Exception e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+            logger.log(Level.SEVERE, "Error sending cancel message", e);
         }
     }
      
@@ -60,7 +62,7 @@ public class MaestroWorker
 
             closeConnectionAndCleanup(connection);
         }catch(Exception e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+            logger.log(Level.SEVERE, "Error setting waiting to " + waiting, e);
         }
     }
     
@@ -79,7 +81,7 @@ public class MaestroWorker
 
             closeConnectionAndCleanup(connection);
         }catch(Exception e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+            logger.log(Level.SEVERE, "Error writing output: " + output, e);
         }
     }
     
@@ -103,9 +105,7 @@ public class MaestroWorker
         Object queue = this.stompConfig.get("queue");
         if ( queue == null )
         {
-            Logger.getLogger( MaestroWorker.class.getName() ).log( Level.SEVERE,
-                                                                   "Missing Stomp Configuration,"
-                                                                       + "Make Sure Queue is Set" );
+            logger.log( Level.SEVERE, "Missing Stomp Configuration. Make Sure Queue is Set" );
             return;
         }
 
@@ -119,7 +119,7 @@ public class MaestroWorker
         try {
             Thread.sleep(500);
         } catch (InterruptedException ex) {
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, "Sleep interrupted", ex);
         }
         
     }
@@ -131,9 +131,7 @@ public class MaestroWorker
 
         if ( ( h == null ) || ( p == null ) )
         {
-            Logger.getLogger( MaestroWorker.class.getName() ).log( Level.SEVERE,
-                                                                   "Missing Stomp Configuration,"
-                                                                       + "Make Sure Host and Port Are Set" );
+            logger.log( Level.SEVERE, "Missing Stomp Configuration. Make Sure Host and Port Are Set" );
             return null;
         }
 
@@ -265,7 +263,7 @@ public class MaestroWorker
 
             closeConnectionAndCleanup(connection, fields);
         }catch(Exception e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+            logger.log(Level.SEVERE, "Error updating fields in record, field: " + field + ", value: " + value, e);
         }
     }
 
@@ -285,7 +283,8 @@ public class MaestroWorker
 
             closeConnectionAndCleanup(connection, fields);
         }catch(Exception e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+            logger.log( Level.SEVERE, "Error creating record, fields: " + StringUtils.join( recordFields, "," )
+                + ", values: " + StringUtils.join( recordValues, "," ), e );
         }
     }
 
@@ -298,7 +297,7 @@ public class MaestroWorker
 
             closeConnectionAndCleanup(connection, fields);
         }catch(Exception e){
-            Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
+            logger.log(Level.SEVERE, "Error deleting record: " + model + " - " + nameOrId, e);
         }
     }
 
