@@ -4,6 +4,7 @@ import static org.fusesource.stomp.client.Constants.*;
 import static org.junit.Assert.*;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 
 import org.apache.activemq.broker.BrokerService;
@@ -17,42 +18,50 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+
 /**
  * Unit test for MaestroWorker.
  */
-public class MaestroWorkerTest 
+public class MaestroWorkerTest
 {
-    
-    BrokerService broker = new BrokerService();
-    
+
+    private static final String HOST = "localhost";
+
+    private static final int PORT = 61619;
+
+    private BrokerService broker = new BrokerService();
+
     @Before
-    public void setUp() throws Exception {
+    public void setUp()
+        throws Exception
+    {
         // configure the broker
-        Thread thread = new Thread () {
-            public void run(){
-            TransportConnector connector = new TransportConnector();
-                try {
-                    connector.setUri(new URI("stomp://localhost:61619"));
-                    broker.addConnector(connector);
-                    broker.setBrokerName("test_broker");
-                    broker.start();
-                } catch (Exception ex) {
-                    throw new RuntimeException( "Unable To Create Broker", ex );
-                }
-            
-            }
-        };
-        thread.start();
-        
-        Thread.sleep(10000);
+        TransportConnector connector = new TransportConnector();
+        connector.setUri( new URI( "stomp://" + HOST + ":" + PORT ) );
+        broker.addConnector( connector );
+        broker.setPersistent( false );
+        broker.setBrokerName( "test_broker" );
+        broker.start();
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown()
+        throws Exception
+    {
         if (broker != null) {
             broker.stop();
         }
-        Thread.sleep(1000);
+    }
+
+    public Stomp getStomp() {
+        try
+        {
+            return new Stomp(HOST, PORT);
+        }
+        catch ( URISyntaxException e )
+        {
+            throw new RuntimeException( e );
+        }
     }
 
     @Test
@@ -71,7 +80,7 @@ public class MaestroWorkerTest
         worker.setStompConfig(config);
 
 
-        Stomp stomp = new Stomp("localhost", 61619);
+        Stomp stomp = getStomp();
         BlockingConnection connection = stomp.connectBlocking();
 
 
@@ -129,7 +138,7 @@ public class MaestroWorkerTest
         worker.setStompConfig(config);
 
 
-        Stomp stomp = new Stomp("localhost", 61619);
+        Stomp stomp = getStomp();
         BlockingConnection connection = stomp.connectBlocking();
 
 
@@ -169,7 +178,7 @@ public class MaestroWorkerTest
         worker.setStompConfig(config);
 
 
-        Stomp stomp = new Stomp("localhost", 61619);
+        Stomp stomp = getStomp();
         BlockingConnection connection = stomp.connectBlocking();
 
 
@@ -208,7 +217,7 @@ public class MaestroWorkerTest
         worker.setStompConfig(config);
 
 
-        Stomp stomp = new Stomp("localhost", 61619);
+        Stomp stomp = getStomp();
         BlockingConnection connection = stomp.connectBlocking();
 
 
@@ -252,7 +261,7 @@ public class MaestroWorkerTest
         worker.setStompConfig(config);
 
 
-        Stomp stomp = new Stomp("localhost", 61619);
+        Stomp stomp = getStomp();
         BlockingConnection connection = stomp.connectBlocking();
 
 
@@ -297,7 +306,7 @@ public class MaestroWorkerTest
         worker.setStompConfig(config);
 
 
-        Stomp stomp = new Stomp("localhost", 61619);
+        Stomp stomp = getStomp();
         BlockingConnection connection = stomp.connectBlocking();
 
 

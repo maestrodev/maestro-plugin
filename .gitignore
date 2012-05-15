@@ -1,5 +1,4 @@
-activemq*
-target
+/target
 /.settings/*
 /.classpath
 /.project
