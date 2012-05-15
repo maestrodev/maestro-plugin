@@ -93,7 +93,7 @@ public class MaestroWorker
         }catch(NullPointerException e){
             Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, 
                     "Missing Stomp Configuration,"+
-                    " Make Sure Please Make Sure Host, Port And Queue Are Set");
+                    " Make Sure Please Make Sure Host, Port And Queue Are Set", e);
         }catch(Exception e){
             Logger.getLogger(MaestroWorker.class.getName()).log(Level.SEVERE, null, e);
         }
