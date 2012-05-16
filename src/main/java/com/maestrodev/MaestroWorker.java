@@ -1,5 +1,7 @@
 package com.maestrodev;
 
+import static java.lang.String.*;
+import static org.apache.commons.lang3.exception.ExceptionUtils.*;
 import static org.fusesource.stomp.client.Constants.*;
 
 import java.io.IOException;
@@ -162,7 +164,7 @@ public class MaestroWorker
      * @param error - Error message
      */
     public void setError(String error){
-        ((JSONObject)getWorkitem().get("fields")).put("__error__", error);
+        getFields().put("__error__", error);
     }
     
     /**
@@ -173,20 +175,19 @@ public class MaestroWorker
     }
 
     /**
-     * Helper method for getting the fields
+     * Helper method for getting a string field
      * 
      * @param field key to get value for
      * @return field value
      */
     public String getField(String field){
-        if(((JSONObject)getWorkitem().get("fields")).get(field) == null){
+        if(getFields().get(field) == null){
             return null;
         }
-        return ((JSONObject)getWorkitem().get("fields")).get(field).toString();
-        
+        return getFields().get(field).toString();
     }
     
-    public Map perform(String methodName, Map workitem) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException{
+     public Map perform(String methodName, Map workitem) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException{
         try{
             JSONParser parser = new JSONParser();
             String json = JSONObject.toJSONString(workitem);
@@ -196,8 +197,9 @@ public class MaestroWorker
             method.invoke(this);
         
         } catch (Exception e) {
-            this.writeOutput("Task Failed: " + e.toString());
-            this.setError("Task Failed: " + e.toString());
+            String msg = format("Task %s failed: %s ", methodName, getStackTrace( e ));
+            this.writeOutput(msg);
+            this.setError(msg);
         }
         return getWorkitem();             
     }
@@ -216,11 +218,12 @@ public class MaestroWorker
     /**
      * Helper method for setting fields
      * @param name string key field name
-     * @param value string value to apply to field
+     * @param value value to apply to field
      * 
      */
-    public void setField(String name, String value){
-        ((JSONObject)getWorkitem().get("fields")).put(name, value);
+    @SuppressWarnings( "unchecked" )
+    public void setField(String name, Object value){
+        getFields().put(name, value);
     }
     
     /**
