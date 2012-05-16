@@ -7,8 +7,11 @@ import static org.fusesource.stomp.client.Constants.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,9 +21,13 @@ import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.stomp.client.BlockingConnection;
 import org.fusesource.stomp.client.Stomp;
 import org.fusesource.stomp.codec.StompFrame;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Main Class for Maestro Plugins written in Java.
@@ -29,6 +36,8 @@ import org.json.simple.parser.ParseException;
 public class MaestroWorker 
 {
     private static Logger logger = Logger.getLogger(MaestroWorker.class.getName());
+
+    private static Gson gson = new Gson();
 
     private JSONObject workitem;
     private Map<String, Object> stompConfig = new HashMap<String, Object>();
@@ -187,7 +196,39 @@ public class MaestroWorker
         return getFields().get(field).toString();
     }
     
-     public Map perform(String methodName, Map workitem) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException{
+    /**
+     * Helper method for getting an array field
+     *
+     * @param field key to get value for
+     * @return field value
+     */
+    public <T> List<T> getArrayField( Class<T> clazz, String field )
+    {
+        JSONObject fields = getFields();
+        Object o = fields.get( field );
+        if ( o == null )
+        {
+            return null;
+        }
+        // work around MAESTRO-1506, arrays are sent as strings
+        if ( o instanceof String )
+        {
+            Type collectionType = new TypeToken<List<T>>(){}.getType();
+            // hack to parse integers as such, not as doubles or longs
+            if (clazz.equals( Integer.class )) {
+                collectionType = new TypeToken<List<Integer>>(){}.getType();
+            } else {
+                collectionType = new TypeToken<List<T>>(){}.getType();
+            }
+            return gson.fromJson( (String) o, collectionType );
+        } else if ( o instanceof JSONArray )
+        {
+            return new ArrayList<T>( (JSONArray) o );
+        }
+        throw new IllegalArgumentException( format( "Field %s is not an array nor can be parsed as such: %s", field, o ) );
+    }
+
+    public Map perform(String methodName, Map workitem) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException{
         try{
             JSONParser parser = new JSONParser();
             String json = JSONObject.toJSONString(workitem);

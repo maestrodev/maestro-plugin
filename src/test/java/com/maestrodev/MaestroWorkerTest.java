@@ -6,17 +6,21 @@ import static org.junit.Assert.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.fusesource.stomp.client.BlockingConnection;
 import org.fusesource.stomp.client.Stomp;
 import org.fusesource.stomp.codec.StompFrame;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import scala.actors.threadpool.Arrays;
 
 
 /**
@@ -332,4 +336,42 @@ public class MaestroWorkerTest
         assertTrue(workitem.get("__model__").equals("model"));
         assertTrue(workitem.get("__name__").equals("name_or_id"));
     }
+
+    @SuppressWarnings( "unchecked" )
+    @Test
+    public void testGetArrayField()
+        throws Exception
+    {
+        JSONObject workitem = new JSONObject();
+        MaestroWorker worker = new MaestroWorker();
+        worker.setWorkitem(workitem);
+        workitem.put( "fields", new JSONObject() );
+
+        String f = "test";
+
+        // string array
+        List<String> expected = Arrays.asList( new String[] { "a", "b", "c" } );
+
+        JSONArray array = new JSONArray();
+        array.addAll( expected );
+        worker.setField( f, array );
+        assertEquals( expected, worker.getArrayField( String.class, f ) );
+
+        worker.setField( f, "[\"a\",\"b\",\"c\"]" );
+        assertEquals( expected, worker.getArrayField( String.class, f ) );
+
+        // integer array
+        List<Integer> expectedInt = Arrays.asList( new Integer[] { 1, 2, 3 } );
+
+        array.clear();
+        array.addAll( expectedInt );
+        worker.setField( f, array );
+        List<Integer> actual = worker.getArrayField( Integer.class, f );
+        assertEquals( expectedInt, actual );
+
+        worker.setField( f, "[1,2,3]" );
+        actual = worker.getArrayField( Integer.class, f );
+        assertArrayEquals( expectedInt.toArray(), actual.toArray() );
+    }
+
 }
