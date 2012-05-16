@@ -3,6 +3,7 @@ package com.maestrodev;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.json.simple.JSONArray;
@@ -42,6 +43,13 @@ public class MaestroWorkerTest
         workitem.put( "fields", new JSONObject() );
 
         String f = "test";
+
+        // edge cases: empty string, empty array
+        worker.setField( f, "" );
+        assertEquals( Collections.emptyList(), worker.getArrayField( String.class, f ) );
+
+        worker.setField( f, "[]" );
+        assertEquals( Collections.emptyList(), worker.getArrayField( String.class, f ) );
 
         // string array
         List<String> expected = Arrays.asList( new String[] { "a", "b", "c" } );

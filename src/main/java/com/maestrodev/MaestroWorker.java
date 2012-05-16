@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -202,6 +203,7 @@ public class MaestroWorker
      * @param field key to get value for
      * @return field value
      */
+    @SuppressWarnings( "unchecked" )
     public <T> List<T> getArrayField( Class<T> clazz, String field )
     {
         JSONObject fields = getFields();
@@ -209,6 +211,10 @@ public class MaestroWorker
         if ( o == null )
         {
             return null;
+        }
+        if ( o instanceof List )
+        {
+            return (List<T>) o;
         }
         // work around MAESTRO-1506, arrays are sent as strings
         if ( o instanceof String )
@@ -220,7 +226,9 @@ public class MaestroWorker
             } else {
                 collectionType = new TypeToken<List<T>>(){}.getType();
             }
-            return gson.fromJson( (String) o, collectionType );
+            List<T> parsed = gson.fromJson( (String) o, collectionType );
+            parsed = (parsed == null) ? Collections.EMPTY_LIST : parsed;
+            return parsed;
         } else if ( o instanceof JSONArray )
         {
             return new ArrayList<T>( (JSONArray) o );
