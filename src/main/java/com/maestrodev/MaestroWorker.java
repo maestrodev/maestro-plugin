@@ -198,7 +198,9 @@ public class MaestroWorker
     }
     
     /**
-     * Helper method for getting an array field
+     * Helper method for getting an array field.
+     * 
+     * Caveat: lists of integers are returned as lists of longs
      *
      * @param field key to get value for
      * @return field value
@@ -215,23 +217,6 @@ public class MaestroWorker
         if ( o instanceof List )
         {
             return (List<T>) o;
-        }
-        // work around MAESTRO-1506, arrays are sent as strings
-        if ( o instanceof String )
-        {
-            Type collectionType = new TypeToken<List<T>>(){}.getType();
-            // hack to parse integers as such, not as doubles or longs
-            if (clazz.equals( Integer.class )) {
-                collectionType = new TypeToken<List<Integer>>(){}.getType();
-            } else {
-                collectionType = new TypeToken<List<T>>(){}.getType();
-            }
-            List<T> parsed = gson.fromJson( (String) o, collectionType );
-            parsed = (parsed == null) ? Collections.EMPTY_LIST : parsed;
-            return parsed;
-        } else if ( o instanceof JSONArray )
-        {
-            return new ArrayList<T>( (JSONArray) o );
         }
         throw new IllegalArgumentException( format( "Field %s is not an array nor can be parsed as such: %s", field, o ) );
     }
