@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Test;
@@ -76,4 +77,21 @@ public class MaestroWorkerTest
         assertArrayEquals( expectedInt.toArray(), actual.toArray() );
     }
 
+    @Test
+    public void testExceptionOnPerform()
+        throws Exception
+    {
+        MaestroWorker worker = new MaestroWorker()
+        {
+            public void test()
+                throws Exception
+            {
+                throw new Exception( "exception" );
+            }
+        };
+        JSONObject workitem = new JSONObject();
+        workitem.put( "fields", new JSONObject() );
+        worker.perform( "test", workitem );
+        assertTrue( worker.getError(), worker.getError().startsWith( "Task test failed: java.lang.Exception: exception" ) );
+    }
 }

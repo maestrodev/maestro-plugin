@@ -236,7 +236,7 @@ public class MaestroWorker
         throw new IllegalArgumentException( format( "Field %s is not an array nor can be parsed as such: %s", field, o ) );
     }
 
-    public Map perform(String methodName, Map workitem) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException{
+    public Map perform(String methodName, Map workitem) {
         try{
             JSONParser parser = new JSONParser();
             String json = JSONObject.toJSONString(workitem);
@@ -245,6 +245,11 @@ public class MaestroWorker
             Method method = getClass().getMethod(methodName);
             method.invoke(this);
         
+        } catch (InvocationTargetException e) {
+            // get the root cause of the exception
+            String msg = format("Task %s failed: %s ", methodName, getStackTrace( e.getCause() ));
+            this.writeOutput(msg);
+            this.setError(msg);
         } catch (Exception e) {
             String msg = format("Task %s failed: %s ", methodName, getStackTrace( e ));
             this.writeOutput(msg);
@@ -252,9 +257,7 @@ public class MaestroWorker
         }
         return getWorkitem();             
     }
-            
-            
-    
+
     /**
      * Helper method for getting the fields
      * 
