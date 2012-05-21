@@ -31,8 +31,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * Main Class for Maestro Plugins written in Java.
- *
+ * Helper Class for Maestro Plugins written in Java. The lifecycle of the plugin starts with a call to
+ * {@link #setStompConfig(Map)} and then the main entry point is {@link #perform(String, Map)}, called by the Maestro
+ * agent, all the other methods are helpers that can be used to deal with parsing, errors,...
  */
 public class MaestroWorker 
 {
@@ -221,22 +222,34 @@ public class MaestroWorker
         throw new IllegalArgumentException( format( "Field %s is not an array nor can be parsed as such: %s", field, o ) );
     }
 
+    /**
+     * Main entry point from the agent.
+     * 
+     * @param methodName name of the method to execute
+     * @param workitem JSON configuration
+     * @return
+     */
     public Map perform(String methodName, Map workitem) {
+        String clazz = this.getClass().getName();
         try{
+            writeOutput(format("Executing plugin: %s.%s%n", clazz, methodName));
+
             JSONParser parser = new JSONParser();
             String json = JSONObject.toJSONString(workitem);
             setWorkitem((JSONObject)parser.parse(json));
 
             Method method = getClass().getMethod(methodName);
             method.invoke(this);
+
+            writeOutput(format("Finished plugin execution: %s.%s%n", clazz, methodName));
         
         } catch (InvocationTargetException e) {
             // get the root cause of the exception
-            String msg = format("Task %s failed: %s ", methodName, getStackTrace( e.getCause() ));
+            String msg = format("Plugin %s.%s failed: %s ", clazz, methodName, getStackTrace( e.getCause() ));
             this.writeOutput(msg);
             this.setError(msg);
         } catch (Exception e) {
-            String msg = format("Task %s failed: %s ", methodName, getStackTrace( e ));
+            String msg = format("Plugin %s.%s failed: %s ", clazz, methodName, getStackTrace( e ));
             this.writeOutput(msg);
             this.setError(msg);
         }

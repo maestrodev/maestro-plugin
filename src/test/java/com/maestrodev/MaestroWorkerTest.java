@@ -78,7 +78,7 @@ public class MaestroWorkerTest
     public void testExceptionOnPerform()
         throws Exception
     {
-        MaestroWorker worker = new MaestroWorker()
+        MaestroWorker worker = new MaestroWorkerStub()
         {
             public void test()
                 throws Exception
@@ -90,6 +90,41 @@ public class MaestroWorkerTest
         workitem.put( "fields", new JSONObject() );
         worker.perform( "test", workitem );
         assertTrue( worker.getError(),
-                    worker.getError().startsWith( "Task test failed: java.lang.Exception: exception" ) );
+                    worker.getError().startsWith( "Plugin com.maestrodev.MaestroWorkerTest$1.test failed: java.lang.Exception: exception" ) );
+    }
+
+    @Test
+    public void testPerform()
+        throws Exception
+    {
+        MaestroWorkerStub worker = new MaestroWorkerStub();
+        JSONObject workitem = new JSONObject();
+        workitem.put( "fields", new JSONObject() );
+        worker.perform( "test", workitem );
+
+        String expected =
+            "Executing plugin: com.maestrodev.MaestroWorkerTest$MaestroWorkerStub.test\n"
+                + "Finished plugin execution: com.maestrodev.MaestroWorkerTest$MaestroWorkerStub.test\n";
+        assertEquals( expected, worker.output.toString() );
+        assertNull( worker.getError() );
+    }
+
+    class MaestroWorkerStub
+        extends MaestroWorker
+    {
+        public StringBuilder output = new StringBuilder();
+
+        public void test()
+            throws Exception
+        {
+            // do nothing
+        }
+
+        @Override
+        public void writeOutput( String output )
+        {
+            this.output.append( output );
+        }
+
     }
 }
