@@ -99,11 +99,14 @@ public class MaestroWorker
     }
     
     private BlockingConnection sendFieldsWithValues(String [] fields, String [] values) throws Exception {
-        BlockingConnection connection = this.getConnection();
         if(fields.length != values.length){
             throw new Exception("Mismatched Field and Value Sets fields.length != values.length" );
         }
+        if (this.workitem == null) {
+            throw new IllegalStateException("Workitem has not been set yet");
+        }
         
+        BlockingConnection connection = this.getConnection();
         for(int ii = 0 ; ii < fields.length ; ++ii){
             this.workitem.put(fields[ii], values[ii]);
         }
@@ -154,11 +157,15 @@ public class MaestroWorker
         return connection;
     }
 
-    private void closeConnectionAndCleanup(BlockingConnection connection) throws IOException{
-        if (connection != null) {
-          connection.suspend();
-          connection.close();
-        }
+    private void closeConnectionAndCleanup(BlockingConnection connection) {
+	if (connection != null) {
+	    connection.suspend();
+	    try {
+		connection.close();
+	    } catch (IOException e) {
+		// ignore
+	    }
+	}
         
         this.workitem.remove("__output__");
         this.workitem.remove("__streaming__");
@@ -232,11 +239,11 @@ public class MaestroWorker
     public Map perform(String methodName, Map workitem) {
         String clazz = this.getClass().getName();
         try{
-            writeOutput(format("Executing plugin: %s.%s%n", clazz, methodName));
-
             JSONParser parser = new JSONParser();
             String json = JSONObject.toJSONString(workitem);
             setWorkitem((JSONObject)parser.parse(json));
+
+            writeOutput(format("Executing plugin: %s.%s%n", clazz, methodName));
 
             Method method = getClass().getMethod(methodName);
             method.invoke(this);
