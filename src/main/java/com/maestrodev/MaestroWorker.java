@@ -7,10 +7,7 @@ import static org.fusesource.stomp.client.Constants.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,13 +19,10 @@ import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.stomp.client.BlockingConnection;
 import org.fusesource.stomp.client.Stomp;
 import org.fusesource.stomp.codec.StompFrame;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Helper Class for Maestro Plugins written in Java. The lifecycle of the plugin starts with a call to
@@ -53,9 +47,7 @@ public class MaestroWorker
             
             String [] fields = {"__cancel__"};
             String [] values = {String.valueOf(true)};
-            BlockingConnection connection = sendFieldsWithValues(fields, values);
-
-            closeConnectionAndCleanup(connection);
+            sendFieldsWithValues(fields, values);
         }catch(Exception e){
             logger.log(Level.SEVERE, "Error sending cancel message", e);
         }
@@ -71,9 +63,7 @@ public class MaestroWorker
             
             String [] fields = {"__waiting__"};
             String [] values = {String.valueOf(waiting)};
-            BlockingConnection connection = sendFieldsWithValues(fields, values);
-
-            closeConnectionAndCleanup(connection);
+            sendFieldsWithValues(fields, values);
         }catch(Exception e){
             logger.log(Level.SEVERE, "Error setting waiting to " + waiting, e);
         }
@@ -90,30 +80,38 @@ public class MaestroWorker
             
             String [] fields = {"__output__","__streaming__"};
             String [] values = {output, String.valueOf(true)};
-            BlockingConnection connection = sendFieldsWithValues(fields, values);
+            sendFieldsWithValues(fields, values);
 
-            closeConnectionAndCleanup(connection);
         }catch(Exception e){
             logger.log(Level.SEVERE, "Error writing output: " + output, e);
         }
     }
     
-    private BlockingConnection sendFieldsWithValues(String [] fields, String [] values) throws Exception {
+    private void sendFieldsWithValues(String [] fields, String [] values) {
         if(fields.length != values.length){
-            throw new Exception("Mismatched Field and Value Sets fields.length != values.length" );
+            throw new IllegalArgumentException("Mismatched Field and Value Sets fields.length != values.length" );
         }
         if (this.workitem == null) {
             throw new IllegalStateException("Workitem has not been set yet");
         }
         
-        BlockingConnection connection = this.getConnection();
         for(int ii = 0 ; ii < fields.length ; ++ii){
             this.workitem.put(fields[ii], values[ii]);
         }
         
-        this.sendCurrentWorkitem(connection);
+        BlockingConnection connection = null;
         
-        return connection;
+        try {
+	    connection = this.getConnection();
+
+	    this.sendCurrentWorkitem(connection);
+        } catch (IOException e) {
+	    throw new RuntimeException( "Error connecting to Stomp server", e );
+        } catch (URISyntaxException e) {
+            throw new RuntimeException( "Error connecting to Stomp server", e );
+        } finally {
+            closeConnectionAndCleanup(connection, fields);
+        }
     }
     
     private void sendCurrentWorkitem(BlockingConnection connection) throws IOException{
@@ -147,8 +145,7 @@ public class MaestroWorker
 
         if ( ( h == null ) || ( p == null ) )
         {
-            logger.log( Level.SEVERE, "Missing Stomp Configuration. Make Sure Host and Port Are Set" );
-            return null;
+            throw new IllegalStateException("Missing Stomp Configuration. Make Sure Host and Port Are Set");
         }
 
         Stomp stomp = new Stomp( h.toString(), Integer.parseInt( p.toString() ) );
@@ -260,7 +257,7 @@ public class MaestroWorker
             this.writeOutput(msg);
             this.setError(msg);
         }
-        return getWorkitem();             
+        return getWorkitem();
     }
 
     /**
@@ -319,18 +316,17 @@ public class MaestroWorker
             
             String [] fields = {"__persist__", "__update__", "__model__", "__record_id__", "__record_field__", "__record_value__"};
             String [] values = {String.valueOf(true), String.valueOf(true), model, nameOrId, field, value};
-            BlockingConnection connection = sendFieldsWithValues(fields, values);
-
-            closeConnectionAndCleanup(connection, fields);
+            sendFieldsWithValues(fields, values);
         }catch(Exception e){
             logger.log(Level.SEVERE, "Error updating fields in record, field: " + field + ", value: " + value, e);
         }
     }
 
-    private void closeConnectionAndCleanup(BlockingConnection connection, String [] fields) throws Exception {
+    private void closeConnectionAndCleanup(BlockingConnection connection, String [] fields) {
         this.closeConnectionAndCleanup(connection);
-        for(String field : fields){
-            this.workitem.remove(field);
+        for (String field : fields) {
+            if (!"__waiting__".equals(field))
+                this.workitem.remove(field);
         }
     }
 
@@ -339,9 +335,7 @@ public class MaestroWorker
             
             String [] fields = {"__persist__", "__create__", "__model__", "__record_fields__", "__record_values__"};
             String [] values = {String.valueOf(true), String.valueOf(true), model, StringUtils.join(recordFields, ","), StringUtils.join(recordValues, ",")};
-            BlockingConnection connection = sendFieldsWithValues(fields, values);
-
-            closeConnectionAndCleanup(connection, fields);
+            sendFieldsWithValues(fields, values);
         }catch(Exception e){
             logger.log( Level.SEVERE, "Error creating record, fields: " + StringUtils.join( recordFields, "," )
                 + ", values: " + StringUtils.join( recordValues, "," ), e );
@@ -353,9 +347,7 @@ public class MaestroWorker
             
             String [] fields = {"__persist__", "__delete__", "__model__", "__name__"};
             String [] values = {String.valueOf(true), String.valueOf(true), model, nameOrId};
-            BlockingConnection connection = sendFieldsWithValues(fields, values);
-
-            closeConnectionAndCleanup(connection, fields);
+            sendFieldsWithValues(fields, values);
         }catch(Exception e){
             logger.log(Level.SEVERE, "Error deleting record: " + model + " - " + nameOrId, e);
         }
