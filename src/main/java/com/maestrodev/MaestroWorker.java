@@ -22,7 +22,7 @@ import org.fusesource.stomp.codec.StompFrame;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import com.google.gson.Gson;
+import org.json.simple.JSONArray;
 
 /**
  * Helper Class for Maestro Plugins written in Java. The lifecycle of the plugin starts with a call to
@@ -33,8 +33,7 @@ public class MaestroWorker
 {
     private static Logger logger = Logger.getLogger(MaestroWorker.class.getName());
 
-    private static Gson gson = new Gson();
-
+    
     private JSONObject workitem;
     private Map<String, Object> stompConfig = new HashMap<String, Object>();
     
@@ -278,6 +277,24 @@ public class MaestroWorker
     @SuppressWarnings( "unchecked" )
     public void setField(String name, Object value){
         getFields().put(name, value);
+    }
+    
+     /**
+     * Helper method for adding links to the UI
+     * @param name string url name
+     * @param url string url to link to
+     * 
+     */
+    public void addLink(String name, String url){
+        if(((JSONObject)getWorkitem().get("fields")).get("__links__") == null) {
+          ((JSONObject)getWorkitem().get("fields")).put("__links__", new JSONArray());
+        }
+        
+        JSONArray links = (JSONArray) ((JSONObject)getWorkitem().get("fields")).get("__links__");
+        JSONObject link = new JSONObject();
+        link.put("name", name);
+        link.put("url", url);
+        links.add(link);
     }
     
     /**
