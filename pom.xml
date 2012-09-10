@@ -4,7 +4,7 @@
   <groupId>com.maestrodev</groupId>
   <artifactId>maestro-plugin</artifactId>
   <packaging>jar</packaging>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
   <name>maestro-plugin</name>
   <url>http://maven.apache.org</url>
   <distributionManagement>
