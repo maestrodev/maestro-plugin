@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.stomp.client.BlockingConnection;
-import org.fusesource.stomp.client.Stomp;
 import org.fusesource.stomp.codec.StompFrame;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -36,7 +35,25 @@ public class MaestroWorker
     
     private JSONObject workitem;
     private Map<String, Object> stompConfig = new HashMap<String, Object>();
+    private StompConnectionFactory stompConnectionFactory;
+
     
+    
+    protected MaestroWorker()
+    {
+        this.stompConnectionFactory = StompConnectionFactory.getInstance();        
+    }
+
+    
+    
+    public MaestroWorker(StompConnectionFactory stompConnectionFactory)
+    {
+        super();
+        this.stompConnectionFactory = stompConnectionFactory;
+    }
+
+
+
     /**
      * Helper that sends cancel message that stops composition execution.
      * 
@@ -86,6 +103,7 @@ public class MaestroWorker
         }
     }
     
+    @SuppressWarnings("unchecked")
     private void sendFieldsWithValues(String [] fields, String [] values) {
         if(fields.length != values.length){
             throw new IllegalArgumentException("Mismatched Field and Value Sets fields.length != values.length" );
@@ -93,6 +111,7 @@ public class MaestroWorker
         if (this.workitem == null) {
             throw new IllegalStateException("Workitem has not been set yet");
         }
+        
         
         for(int ii = 0 ; ii < fields.length ; ++ii){
             this.workitem.put(fields[ii], values[ii]);
@@ -147,10 +166,8 @@ public class MaestroWorker
             throw new IllegalStateException("Missing Stomp Configuration. Make Sure Host and Port Are Set");
         }
 
-        Stomp stomp = new Stomp( h.toString(), Integer.parseInt( p.toString() ) );
-        BlockingConnection connection = stomp.connectBlocking();
+        return stompConnectionFactory.getConnection(h.toString(), Integer.parseInt( p.toString() ));
         
-        return connection;
     }
 
     private void closeConnectionAndCleanup(BlockingConnection connection) {
@@ -177,6 +194,7 @@ public class MaestroWorker
      * 
      * @param error - Error message
      */
+    @SuppressWarnings("unchecked")
     public void setError(String error){
         getFields().put("__error__", error);
     }
@@ -231,7 +249,8 @@ public class MaestroWorker
      * @param methodName name of the method to execute
      * @param workitem JSON configuration
      * @return
-     */
+     */    
+    @SuppressWarnings("rawtypes")
     public Map perform(String methodName, Map workitem) {
         String clazz = this.getClass().getName();
         try{
@@ -285,6 +304,7 @@ public class MaestroWorker
      * @param url string url to link to
      * 
      */
+    @SuppressWarnings("unchecked")
     public void addLink(String name, String url){
         if(((JSONObject)getWorkitem().get("fields")).get("__links__") == null) {
           ((JSONObject)getWorkitem().get("fields")).put("__links__", new JSONArray());
