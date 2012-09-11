@@ -7,6 +7,11 @@
   <version>1.3-SNAPSHOT</version>
   <name>maestro-plugin</name>
   <url>http://maven.apache.org</url>
+  <scm>
+    <developerConnection>scm:git:git@github.com:maestrodev/maestro-plugin.git</developerConnection>
+    <connection>scm:git:git@github.com:maestrodev/maestro-plugin.git</connection>
+  </scm>
+  
   <distributionManagement>
     <repository>
       <id>maestro-deploy</id>
