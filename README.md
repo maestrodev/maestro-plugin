@@ -1,7 +1,7 @@
 Maestro Plugin
 ==============
 
-Maestro 4 provides support for plugins written in Java and Ruby.  They are both permitted to have dependent libraries.  Ruby based plugins provide the worker source file (.rb) and any dependencies (.gem) are loaded using the Rubygems (gem) executable.  Java based plugins provide a java package (.jar) containing worker source, a project object model (pom.xml) with a list of dependencies.  Java dependecies are then loaded using Maven.  Both plugin types provide a manifest file (manifest.json) that details the contents and attributes of the plugin.
+Maestro 4 provides support for plugins written in Java and Ruby.  They are both permitted to have dependent libraries.  Ruby based plugins provide the worker source file (.rb) and any dependencies (.gem) are loaded using the Rubygems (gem) executable.  Java based plugins provide a java package (.jar) containing worker source, a project object model (pom.xml) with a list of dependencies.  Java dependencies are then loaded using Maven.  Both plugin types provide a manifest file (manifest.json) that details the contents and attributes of the plugin.
 
 Develop a Maestro 4 plugin
 --------------------------
