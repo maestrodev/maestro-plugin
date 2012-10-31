@@ -53,6 +53,19 @@ public class MaestroWorker
     }
 
 
+     /**
+     * Helper that sends not needed message that stops composition execution.
+     * 
+     */
+     public void notNeeded() {
+        try{
+            String [] fields = {"__not_needed__"};
+            String [] values = {String.valueOf(true)};
+            sendFieldsWithValues(fields, values);
+        }catch(Exception e){
+            logger.log(Level.SEVERE, "Error sending cancel message", e);
+        }
+    }
 
     /**
      * Helper that sends cancel message that stops composition execution.
@@ -60,7 +73,6 @@ public class MaestroWorker
      */
      public void cancel() {
         try{
-            
             String [] fields = {"__cancel__"};
             String [] values = {String.valueOf(true)};
             sendFieldsWithValues(fields, values);
@@ -76,7 +88,6 @@ public class MaestroWorker
      */
     public void setWaiting(boolean waiting) {
         try{
-            
             String [] fields = {"__waiting__"};
             String [] values = {String.valueOf(waiting)};
             sendFieldsWithValues(fields, values);

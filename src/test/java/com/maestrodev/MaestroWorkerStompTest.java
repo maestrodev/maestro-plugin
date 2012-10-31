@@ -103,6 +103,46 @@ public class MaestroWorkerStompTest
         assertTrue(workitem.get("__output__").equals("Hello Maestro Plugin!"));
        
     }
+ 
+    @Test
+    public void testNotNeeded() throws Exception
+    {
+
+        HashMap config = new HashMap();
+        config.put("host", "localhost");
+        config.put("port", "61619");
+        config.put("queue", "/queue/test");
+
+        JSONObject workitem = new JSONObject();
+
+        MaestroWorker worker = new MaestroWorker();
+        worker.setWorkitem(workitem);
+        worker.setStompConfig(config);
+
+
+        Stomp stomp = getStomp();
+        BlockingConnection connection = stomp.connectBlocking();
+
+
+        StompFrame frame = new StompFrame(SUBSCRIBE);
+        frame.addHeader(DESTINATION, StompFrame.encodeHeader("/queue/test"));
+        frame.addHeader(ID, connection.nextId());
+        StompFrame response = connection.request(frame);
+
+        // This unblocks once the response frame is received.
+        assertNotNull(response);
+
+        worker.notNeeded();
+
+        // Try to get the received message.
+        StompFrame received = connection.receive();
+        assertTrue(received.action().equals(MESSAGE));
+        JSONParser parser = new JSONParser();
+        
+        workitem = (JSONObject) parser.parse(received.content().ascii().toString());
+        assertTrue(workitem.get("__not_needed__").equals("true"));
+       
+    }
     
     @Test
     public void testCancel() throws Exception
