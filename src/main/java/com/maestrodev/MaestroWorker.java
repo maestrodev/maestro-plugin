@@ -30,6 +30,7 @@ import org.json.simple.JSONArray;
  */
 public class MaestroWorker 
 {
+    private static final String LINKS_META = "__links__";
     private static Logger logger = Logger.getLogger(MaestroWorker.class.getName());
 
     
@@ -317,11 +318,13 @@ public class MaestroWorker
      */
     @SuppressWarnings("unchecked")
     public void addLink(String name, String url){
-        if(((JSONObject)getWorkitem().get("fields")).get("__links__") == null) {
-          ((JSONObject)getWorkitem().get("fields")).put("__links__", new JSONArray());
+        JSONObject fields = getFields();
+        JSONArray links = (JSONArray) fields.get(LINKS_META);
+        if(links == null) {
+            links = new JSONArray();
+            fields.put(LINKS_META, links);
         }
         
-        JSONArray links = (JSONArray) ((JSONObject)getWorkitem().get("fields")).get("__links__");
         JSONObject link = new JSONObject();
         link.put("name", name);
         link.put("url", url);
