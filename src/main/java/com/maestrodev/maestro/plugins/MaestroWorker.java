@@ -33,9 +33,26 @@ import org.json.simple.JSONArray;
  * other methods are helpers that can be used to deal with parsing, errors, etc.
  */
 public class MaestroWorker {
+    
+    private static final Logger logger = Logger.getLogger(MaestroWorker.class.getName());
+    
+    private static final String CREATE_META = "__create__";
+    private static final String DELETE_META = "__delete__";
+    private static final String NAME_META = "__name__";
+    private static final String RECORD_VALUES_META = "__record_values__";
+    private static final String RECORD_FIELDS_META = "__record_fields__";
+    private static final String RECORD_VALUE_META = "__record_value__";
+    private static final String RECORD_FIELD_META = "__record_field__";
+    private static final String RECORD_ID_META = "__record_id__";
+    private static final String MODEL_META = "__model__";
+    private static final String UPDATE_META = "__update__";
+    private static final String PERSIST_META = "__persist__";
+    private static final String STREAMING_META = "__streaming__";
+    private static final String OUTPUT_META = "__output__";
+    private static final String WAITING_META = "__waiting__";
+    private static final String CANCEL_META = "__cancel__";
+    private static final String NOT_NEEDED_META = "__not_needed__";
     private static final String LINKS_META = "__links__";
-    private static Logger logger = Logger.getLogger(MaestroWorker.class
-	    .getName());
 
     private JSONObject workitem;
     private Map<String, Object> stompConfig = new HashMap<String, Object>();
@@ -63,7 +80,7 @@ public class MaestroWorker {
      */
     public void notNeeded() {
 	try {
-	    String[] fields = { "__not_needed__" };
+	    String[] fields = { NOT_NEEDED_META };
 	    String[] values = { String.valueOf(true) };
 	    sendFieldsWithValues(fields, values);
 	} catch (Exception e) {
@@ -77,7 +94,7 @@ public class MaestroWorker {
      */
     public void cancel() {
 	try {
-	    String[] fields = { "__cancel__" };
+	    String[] fields = { CANCEL_META };
 	    String[] values = { String.valueOf(true) };
 	    sendFieldsWithValues(fields, values);
 	} catch (Exception e) {
@@ -92,7 +109,7 @@ public class MaestroWorker {
      */
     public void setWaiting(boolean waiting) {
 	try {
-	    String[] fields = { "__waiting__" };
+	    String[] fields = { WAITING_META };
 	    String[] values = { String.valueOf(waiting) };
 	    sendFieldsWithValues(fields, values);
 	} catch (Exception e) {
@@ -107,7 +124,7 @@ public class MaestroWorker {
      */
     public void writeOutput(String output) {
 	try {
-	    String[] fields = { "__output__", "__streaming__" };
+	    String[] fields = { OUTPUT_META, STREAMING_META };
 	    String[] values = { output, String.valueOf(true) };
 	    sendFieldsWithValues(fields, values);
 	} catch (Exception e) {
@@ -219,13 +236,12 @@ public class MaestroWorker {
 	    }
 	}
 
-	this.workitem.remove("__output__");
-	this.workitem.remove("__streaming__");
-	this.workitem.remove("__cancel__");
-	if (this.workitem.get("__waiting__") != null
-		&& Boolean.getBoolean(this.workitem.get("__waiting__")
-			.toString()) == false) {
-	    this.workitem.remove("__waiting__");
+	this.workitem.remove(OUTPUT_META);
+	this.workitem.remove(STREAMING_META);
+	this.workitem.remove(CANCEL_META);
+	if (this.workitem.get(WAITING_META) != null
+		&& !Boolean.parseBoolean(this.workitem.get(WAITING_META).toString())) {
+	    this.workitem.remove(WAITING_META);
 	}
     }
     
@@ -239,7 +255,7 @@ public class MaestroWorker {
 	    String[] fields) {
 	this.closeConnectionAndCleanup(connection);
 	for (String field : fields) {
-	    if (!"__waiting__".equals(field))
+	    if (!WAITING_META.equals(field))
 		this.workitem.remove(field);
 	}
     }
@@ -425,8 +441,8 @@ public class MaestroWorker {
 	    String field, String value) {
 	try {
 
-	    String[] fields = { "__persist__", "__update__", "__model__",
-		    "__record_id__", "__record_field__", "__record_value__" };
+	    String[] fields = { PERSIST_META, UPDATE_META, MODEL_META,
+		    RECORD_ID_META, RECORD_FIELD_META, RECORD_VALUE_META };
 	    String[] values = { String.valueOf(true), String.valueOf(true),
 		    model, nameOrId, field, value };
 	    sendFieldsWithValues(fields, values);
@@ -446,8 +462,8 @@ public class MaestroWorker {
 	    String[] recordValues) {
 	try {
 
-	    String[] fields = { "__persist__", "__create__", "__model__",
-		    "__record_fields__", "__record_values__" };
+	    String[] fields = { PERSIST_META, CREATE_META, MODEL_META,
+		    RECORD_FIELDS_META, RECORD_VALUES_META };
 	    String[] values = { String.valueOf(true), String.valueOf(true),
 		    model, StringUtils.join(recordFields, ","),
 		    StringUtils.join(recordValues, ",") };
@@ -466,8 +482,8 @@ public class MaestroWorker {
      */
     void deleteRecord(String model, String nameOrId) {
 	try {
-	    String[] fields = { "__persist__", "__delete__", "__model__",
-		    "__name__" };
+	    String[] fields = { PERSIST_META, DELETE_META, MODEL_META,
+		    NAME_META };
 	    String[] values = { String.valueOf(true), String.valueOf(true),
 		    model, nameOrId };
 	    sendFieldsWithValues(fields, values);
