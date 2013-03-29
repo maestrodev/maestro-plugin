@@ -70,8 +70,8 @@ public class MaestroWorker {
      * 
      * @param stompConnectionFactory a StompConnectionFactory
      */
-    public MaestroWorker(StompConnectionFactory stompConnectionFactory) {
-	this.stompConnectionFactory = stompConnectionFactory;
+    protected MaestroWorker(StompConnectionFactory stompConnectionFactory) {
+	setStompConnectionFactory(stompConnectionFactory);
     }
 
     /**
@@ -430,6 +430,14 @@ public class MaestroWorker {
 	this.stompConfig = stompConfig;
     }
 
+    
+    /**
+     * Sets the StompConnectionFactory. This is used to help during unit testing.
+     */
+    public void setStompConnectionFactory(StompConnectionFactory stompConnectionFactory) {
+	this.stompConnectionFactory = stompConnectionFactory;
+    }
+    
     /**
      * Updates the record in the database with the specified field value.
      * @param model the table or model name.
