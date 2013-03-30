@@ -3,7 +3,7 @@
   <groupId>com.maestrodev</groupId>
   <artifactId>maestro-plugin</artifactId>
   <packaging>jar</packaging>
-  <version>1.4</version>
+  <version>1.5-SNAPSHOT</version>
   <name>maestro-plugin</name>
   <url>http://maven.apache.org</url>
   <scm>
