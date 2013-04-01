@@ -33,15 +33,6 @@
     </license>
   </licenses>
     
-  <build>
-    <plugins>
-         <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -169,7 +160,11 @@
         </property>
       </activation>
       <build>
-        <plugins>         
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>              
+          </plugin>         
           <plugin>
             <inherited>true</inherited>
             <artifactId>maven-deploy-plugin</artifactId>
