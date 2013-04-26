@@ -96,7 +96,7 @@
   <repositories>
     <repository>
       <id>maestrodev</id>
-      <url>https://repo.maestrodev.com/archiva/repository/public/</url>
+      <url>https://repo.maestrodev.com/archiva/repository/all/</url>
       <snapshots>
         <enabled>true</enabled>
         <checksumPolicy>fail</checksumPolicy>
@@ -120,18 +120,35 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>2.2.2</version>
           <configuration>
-            <goals>deploy site</goals>
-            <arguments>-Pgithub-site</arguments>
+        <!--     <goals>deploy site</goals>
+            <arguments>-Pgithub-site</arguments> -->
           </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
-  </build>
-  <reporting>
+  </build>  
+  <profiles>
+    <profile>    
+      <id>github-site</id>
+      <pluginRepositories>
+        <pluginRepository>
+            <id>apache</id>
+            <url>https://repository.apache.org/content/repositories/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+                <checksumPolicy>fail</checksumPolicy>
+            </releases>
+        </pluginRepository>
+      </pluginRepositories>
+      <reporting>
     <plugins>     
       <plugin>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.6</version>
+        <version>2.7-SNAPSHOT</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -169,9 +186,6 @@
       </plugin>
     </plugins>
   </reporting>
-  <profiles>
-    <profile>
-      <id>github-site</id>
       <build>
         <plugins>
           <plugin>
