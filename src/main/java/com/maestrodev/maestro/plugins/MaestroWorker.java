@@ -208,17 +208,24 @@ public class MaestroWorker {
     private BlockingConnection getConnection() throws IOException,
 	    URISyntaxException {
 
-	Object h = this.stompConfig.get("host");
-	Object p = this.stompConfig.get("port");
+        Object uri = stompConfig.get("url");
 
-	if ((h == null) || (p == null)) {
-	    throw new IllegalStateException(
-		    "Missing Stomp Configuration. Make Sure Host and Port Are Set");
-	}
+        if (uri == null) {
 
-	return stompConnectionFactory.getConnection(h.toString(),
-		Integer.parseInt(p.toString()));
+	    Object h = this.stompConfig.get("host");
+	    Object p = this.stompConfig.get("port");
 
+	    if ((h == null) || (p == null)) {
+	        throw new IllegalStateException(
+		        "Missing Stomp Configuration. Make Sure Host and Port Are Set");
+	    }
+
+	    return stompConnectionFactory.getConnection(h.toString(),
+                Integer.parseInt(p.toString()));
+        }
+        else {
+	    return stompConnectionFactory.getConnection(uri.toString());
+        }
     }
     
     /**
