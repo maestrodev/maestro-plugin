@@ -9,18 +9,18 @@ import static org.junit.Assert.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.fusesource.stomp.client.BlockingConnection;
 import org.fusesource.stomp.client.Stomp;
 import org.fusesource.stomp.codec.StompFrame;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.jr.ob.JSON;
 import com.maestrodev.maestro.plugins.MaestroWorker;
 
 /**
@@ -36,8 +36,11 @@ public class MaestroWorkerStompTest {
     
     HashMap<String,Object> config;
 
+    private Map<String, Object> workitem;
+
     @Before
     public void setUp() throws Exception {
+        workitem = new HashMap<String, Object>();
 	config = new HashMap<String,Object>();
 	config.put("host", "localhost");
 	config.put("port", "61619");
@@ -70,8 +73,6 @@ public class MaestroWorkerStompTest {
     @Test
     public void testWriteOutput() throws Exception {
 
-	JSONObject workitem = new JSONObject();
-
 	MaestroWorker worker = new MaestroWorker();
 	worker.setWorkitem(workitem);
 	worker.setStompConfig(config);
@@ -92,18 +93,14 @@ public class MaestroWorkerStompTest {
 	// Try to get the received message.
 	StompFrame received = connection.receive();
 	assertTrue(received.action().equals(MESSAGE));
-	JSONParser parser = new JSONParser();
 
-	workitem = (JSONObject) parser.parse(received.content().ascii()
-		.toString());
+	workitem = JSON.std.mapFrom(received.content().ascii().toString());
 	assertTrue(workitem.get("__output__").equals("Hello Maestro Plugin!"));
 
     }
 
     @Test
     public void testNotNeeded() throws Exception {
-
-	JSONObject workitem = new JSONObject();
 
 	MaestroWorker worker = new MaestroWorker();
 	worker.setWorkitem(workitem);
@@ -125,18 +122,14 @@ public class MaestroWorkerStompTest {
 	// Try to get the received message.
 	StompFrame received = connection.receive();
 	assertTrue(received.action().equals(MESSAGE));
-	JSONParser parser = new JSONParser();
 
-	workitem = (JSONObject) parser.parse(received.content().ascii()
-		.toString());
+	workitem = JSON.std.mapFrom(received.content().ascii().toString());
 	assertTrue(workitem.get("__not_needed__").equals("true"));
 
     }
 
     @Test
     public void testCancel() throws Exception {
-
-	JSONObject workitem = new JSONObject();
 
 	MaestroWorker worker = new MaestroWorker();
 	worker.setWorkitem(workitem);
@@ -158,18 +151,14 @@ public class MaestroWorkerStompTest {
 	// Try to get the received message.
 	StompFrame received = connection.receive();
 	assertTrue(received.action().equals(MESSAGE));
-	JSONParser parser = new JSONParser();
 
-	workitem = (JSONObject) parser.parse(received.content().ascii()
-		.toString());
+    workitem = JSON.std.mapFrom(received.content().ascii().toString());
 	assertTrue(workitem.get("__cancel__").equals("true"));
 
     }
 
     @Test
     public void testSetWaiting() throws Exception {
-
-	JSONObject workitem = new JSONObject();
 
 	MaestroWorker worker = new MaestroWorker();
 	worker.setWorkitem(workitem);
@@ -191,17 +180,13 @@ public class MaestroWorkerStompTest {
 	// Try to get the received message.
 	StompFrame received = connection.receive();
 	assertTrue(received.action().equals(MESSAGE));
-	JSONParser parser = new JSONParser();
 
-	workitem = (JSONObject) parser.parse(received.content().ascii()
-		.toString());
+    workitem = JSON.std.mapFrom(received.content().ascii().toString());
 	assertTrue(workitem.get("__waiting__").equals("true"));
     }
 
     @Test
     public void testUpdateFieldsInRecord() throws Exception {
-
-	JSONObject workitem = new JSONObject();
 
 	MaestroWorker worker = new MaestroWorker();
 	worker.setWorkitem(workitem);
@@ -223,10 +208,8 @@ public class MaestroWorkerStompTest {
 	// Try to get the received message.
 	StompFrame received = connection.receive();
 	assertTrue(received.action().equals(MESSAGE));
-	JSONParser parser = new JSONParser();
 
-	workitem = (JSONObject) parser.parse(received.content().ascii()
-		.toString());
+    workitem = JSON.std.mapFrom(received.content().ascii().toString());
 	assertTrue(workitem.get("__persist__").equals("true"));
 	assertTrue(workitem.get("__update__").equals("true"));
 	assertTrue(workitem.get("__model__").equals("model"));
@@ -237,9 +220,6 @@ public class MaestroWorkerStompTest {
 
     @Test
     public void testCreateRecordWithFields() throws Exception {
-
-	JSONObject workitem = new JSONObject();
-
 	MaestroWorker worker = new MaestroWorker();
 	worker.setWorkitem(workitem);
 	worker.setStompConfig(config);
@@ -262,10 +242,8 @@ public class MaestroWorkerStompTest {
 	// Try to get the received message.
 	StompFrame received = connection.receive();
 	assertTrue(received.action().equals(MESSAGE));
-	JSONParser parser = new JSONParser();
 
-	workitem = (JSONObject) parser.parse(received.content().ascii()
-		.toString());
+    workitem = JSON.std.mapFrom(received.content().ascii().toString());
 	assertTrue(workitem.get("__persist__").equals("true"));
 	assertTrue(workitem.get("__create__").equals("true"));
 	assertTrue(workitem.get("__model__").equals("model"));
@@ -275,9 +253,6 @@ public class MaestroWorkerStompTest {
 
     @Test
     public void testDeleteRecord() throws Exception {
-
-	JSONObject workitem = new JSONObject();
-
 	MaestroWorker worker = new MaestroWorker();
 	worker.setWorkitem(workitem);
 	worker.setStompConfig(config);
@@ -298,10 +273,8 @@ public class MaestroWorkerStompTest {
 	// Try to get the received message.
 	StompFrame received = connection.receive();
 	assertTrue(received.action().equals(MESSAGE));
-	JSONParser parser = new JSONParser();
 
-	workitem = (JSONObject) parser.parse(received.content().ascii()
-		.toString());
+    workitem = JSON.std.mapFrom(received.content().ascii().toString());
 	assertTrue(workitem.get("__persist__").equals("true"));
 	assertTrue(workitem.get("__delete__").equals("true"));
 	assertTrue(workitem.get("__model__").equals("model"));

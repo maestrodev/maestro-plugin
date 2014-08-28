@@ -3,14 +3,17 @@
  */
 package com.maestrodev.maestro.plugins;
 
-import static java.lang.String.*;
-import static org.apache.commons.lang3.exception.ExceptionUtils.*;
-import static org.fusesource.stomp.client.Constants.*;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
+import static org.fusesource.stomp.client.Constants.DESTINATION;
+import static org.fusesource.stomp.client.Constants.SEND;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +24,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.stomp.client.BlockingConnection;
 import org.fusesource.stomp.codec.StompFrame;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
-import org.json.simple.JSONArray;
+import com.fasterxml.jackson.jr.ob.JSON;
 
 /**
  * Helper Class for Maestro Plugins written in Java. The lifecycle of the plugin
@@ -54,7 +55,7 @@ public class MaestroWorker {
     private static final String NOT_NEEDED_META = "__not_needed__";
     private static final String LINKS_META = "__links__";
 
-    private JSONObject workitem;
+    private Map<String, Object> workitem;
     private Map<String, Object> stompConfig = new HashMap<String, Object>();
     private StompConnectionFactory stompConnectionFactory;
 
@@ -138,7 +139,6 @@ public class MaestroWorker {
      * @param fields the fields.
      * @param values the values.
      */
-    @SuppressWarnings("unchecked")
     private void sendFieldsWithValues(String[] fields, String[] values) {
 	if (fields.length != values.length) {
 	    throw new IllegalArgumentException(
@@ -184,7 +184,8 @@ public class MaestroWorker {
 
 	StompFrame frame = new StompFrame(SEND);
 	frame.addHeader(DESTINATION, StompFrame.encodeHeader(queue.toString()));
-	Buffer buffer = new Buffer(this.workitem.toJSONString().getBytes());
+	String json = JSON.std.asString(this.workitem);
+	Buffer buffer = new Buffer(json.getBytes());
 	frame.content(buffer);
 
 	connection.send(frame);
@@ -272,7 +273,6 @@ public class MaestroWorker {
      * 
      * @param error Error message
      */
-    @SuppressWarnings("unchecked")
     public void setError(String error) {
 	getFields().put("__error__", error);
     }
@@ -308,7 +308,7 @@ public class MaestroWorker {
      */
     @SuppressWarnings("unchecked")
     public <T> List<T> getArrayField(Class<T> clazz, String field) {
-	JSONObject fields = getFields();
+	Map<String, Object> fields = getFields();
 	Object o = fields.get(field);
 	if (o == null) {
 	    return null;
@@ -316,6 +316,9 @@ public class MaestroWorker {
 	if (o instanceof List) {
 	    return (List<T>) o;
 	}
+    if (o instanceof Object[]) {
+        return (List<T>) Arrays.asList((Object[]) o);
+    }
 	throw new IllegalArgumentException(format(
 		"Field %s is not an array nor can be parsed as such: %s",
 		field, o));
@@ -329,12 +332,10 @@ public class MaestroWorker {
      * @return the work item
      */
     @SuppressWarnings("rawtypes")
-    public final Map perform(String methodName, Map workitem) {
+    public final Map perform(String methodName, Map<String, Object> workitem) {
 	String className = this.getClass().getName();
 	try {
-	    JSONParser parser = new JSONParser();
-	    String json = JSONObject.toJSONString(workitem);
-	    setWorkitem((JSONObject) parser.parse(json));
+	    setWorkitem(workitem);
 
 	    writeOutput(format("Executing plugin: %s.%s%n", className, methodName));
 
@@ -364,8 +365,9 @@ public class MaestroWorker {
      * 
      * @return the work item fields.
      */
-    public JSONObject getFields() {
-	return ((JSONObject) getWorkitem().get("fields"));
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getFields() {
+        return (Map<String, Object>) getWorkitem().get("fields");
     }
 
     /**
@@ -374,7 +376,6 @@ public class MaestroWorker {
      * @param name the field name
      * @param value value to apply to field
      */
-    @SuppressWarnings("unchecked")
     public void setField(String name, Object value) {
 	getFields().put(name, value);
     }
@@ -388,17 +389,17 @@ public class MaestroWorker {
      */
     @SuppressWarnings("unchecked")
     public void addLink(String name, String url) {
-	JSONObject fields = getFields();
-	JSONArray links = (JSONArray) fields.get(LINKS_META);
-	if (links == null) {
-	    links = new JSONArray();
-	    fields.put(LINKS_META, links);
-	}
+        Map<String, Object> fields = getFields();
+        List<Map<String, String>> links = (List<Map<String, String>>) fields.get(LINKS_META);
+        if (links == null) {
+            links = new ArrayList<Map<String,String>>();
+            fields.put(LINKS_META, links);
+        }
 
-	JSONObject link = new JSONObject();
-	link.put("name", name);
-	link.put("url", url);
-	links.add(link);
+        Map<String, String> link = new HashMap<String, String>();
+        link.put("name", name);
+        link.put("url", url);
+        links.add(link);
     }
 
     /**
@@ -406,8 +407,8 @@ public class MaestroWorker {
      * 
      * @return the work item.
      */
-    public JSONObject getWorkitem() {
-	return workitem;
+    public Map<String, Object> getWorkitem() {
+        return workitem;
     }
 
     /**
@@ -415,8 +416,8 @@ public class MaestroWorker {
      * 
      * @param workitem the work item.
      */
-    public void setWorkitem(JSONObject workitem) {
-	this.workitem = workitem;
+    public void setWorkitem(Map<String, Object> workitem) {
+        this.workitem = workitem;
     }
 
     /**
