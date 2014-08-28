@@ -17,13 +17,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.stomp.client.BlockingConnection;
 import org.fusesource.stomp.codec.StompFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.jr.ob.JSON;
 
@@ -35,7 +35,7 @@ import com.fasterxml.jackson.jr.ob.JSON;
  */
 public class MaestroWorker {
     
-    private static final Logger logger = Logger.getLogger(MaestroWorker.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(MaestroWorker.class);
     
     private static final String CREATE_META = "__create__";
     private static final String DELETE_META = "__delete__";
@@ -85,7 +85,7 @@ public class MaestroWorker {
 	    String[] values = { String.valueOf(true) };
 	    sendFieldsWithValues(fields, values);
 	} catch (Exception e) {
-	    logger.log(Level.SEVERE, "Error sending cancel message", e);
+	    logger.error("Error sending cancel message", e);
 	}
     }
 
@@ -99,7 +99,7 @@ public class MaestroWorker {
 	    String[] values = { String.valueOf(true) };
 	    sendFieldsWithValues(fields, values);
 	} catch (Exception e) {
-	    logger.log(Level.SEVERE, "Error sending cancel message", e);
+	    logger.error("Error sending cancel message", e);
 	}
     }
 
@@ -114,7 +114,7 @@ public class MaestroWorker {
 	    String[] values = { String.valueOf(waiting) };
 	    sendFieldsWithValues(fields, values);
 	} catch (Exception e) {
-	    logger.log(Level.SEVERE, "Error setting waiting to " + waiting, e);
+	    logger.error("Error setting waiting to " + waiting, e);
 	}
     }
 
@@ -129,7 +129,7 @@ public class MaestroWorker {
 	    String[] values = { output, String.valueOf(true) };
 	    sendFieldsWithValues(fields, values);
 	} catch (Exception e) {
-	    logger.log(Level.SEVERE, "Error writing output: " + output, e);
+	    logger.error("Error writing output: " + output, e);
 	}
     }
 
@@ -177,8 +177,7 @@ public class MaestroWorker {
 
 	Object queue = this.stompConfig.get("queue");
 	if (queue == null) {
-	    logger.log(Level.SEVERE,
-		    "Missing Stomp Configuration. Make Sure Queue is Set");
+	    logger.error("Missing Stomp Configuration. Make Sure Queue is Set");
 	    return;
 	}
 
@@ -193,7 +192,7 @@ public class MaestroWorker {
 	try {
 	    Thread.sleep(500);
 	} catch (InterruptedException ex) {
-	    logger.log(Level.SEVERE, "Sleep interrupted", ex);
+	    logger.error("Sleep interrupted", ex);
 	}
 
     }
@@ -337,23 +336,28 @@ public class MaestroWorker {
 	try {
 	    setWorkitem(workitem);
 
-	    writeOutput(format("Executing plugin: %s.%s%n", className, methodName));
+	    String msg = format("Executing plugin: %s.%s%n", className, methodName);
+	    logger.info(msg);
+	    writeOutput(msg);
 
 	    Method method = getClass().getMethod(methodName);
 	    method.invoke(this);
 
-	    writeOutput(format("Finished plugin execution: %s.%s%n", className,
-		    methodName));
+	    msg = format("Finished plugin execution: %s.%s%n", className, methodName);
+        logger.info(msg);
+	    writeOutput(msg);
 
 	} catch (InvocationTargetException e) {
 	    // get the root cause of the exception
 	    String msg = format("Plugin %s.%s failed: %s ", className, methodName,
 		    getStackTrace(e.getCause()));
+        logger.error(msg);
 	    this.writeOutput(msg);
 	    this.setError(msg);
 	} catch (Exception e) {
 	    String msg = format("Plugin %s.%s failed: %s ", className, methodName,
 		    getStackTrace(e));
+        logger.error(msg);
 	    this.writeOutput(msg);
 	    this.setError(msg);
 	}
@@ -463,7 +467,7 @@ public class MaestroWorker {
 		    model, nameOrId, field, value };
 	    sendFieldsWithValues(fields, values);
 	} catch (Exception e) {
-	    logger.log(Level.SEVERE, "Error updating fields in record, field: "
+	    logger.error("Error updating fields in record, field: "
 		    + field + ", value: " + value, e);
 	}
     }
@@ -485,7 +489,7 @@ public class MaestroWorker {
 		    StringUtils.join(recordValues, ",") };
 	    sendFieldsWithValues(fields, values);
 	} catch (Exception e) {
-	    logger.log(Level.SEVERE, "Error creating record, fields: "
+	    logger.error("Error creating record, fields: "
 		    + StringUtils.join(recordFields, ",") + ", values: "
 		    + StringUtils.join(recordValues, ","), e);
 	}
@@ -504,7 +508,7 @@ public class MaestroWorker {
 		    model, nameOrId };
 	    sendFieldsWithValues(fields, values);
 	} catch (Exception e) {
-	    logger.log(Level.SEVERE, "Error deleting record: " + model + " - "
+	    logger.error("Error deleting record: " + model + " - "
 		    + nameOrId, e);
 	}
     }
