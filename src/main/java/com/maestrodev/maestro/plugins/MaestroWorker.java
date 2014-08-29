@@ -54,6 +54,7 @@ public class MaestroWorker {
     private static final String CANCEL_META = "__cancel__";
     private static final String NOT_NEEDED_META = "__not_needed__";
     private static final String LINKS_META = "__links__";
+    private static final String CONTEXT_OUTPUTS = "__context_outputs__";
 
     private Map<String, Object> workitem;
     private Map<String, Object> stompConfig = new HashMap<String, Object>();
@@ -284,16 +285,26 @@ public class MaestroWorker {
     }
 
     /**
-     * Retrieve the specified field from the work item.
+     * Retrieve the specified field from the workitem.
      * 
      * @param field key to get value for
      * @return field value
      */
     public String getField(String field) {
-	if (getFields().get(field) == null) {
-	    return null;
-	}
-	return getFields().get(field).toString();
+        if (getFields().get(field) == null) {
+            return null;
+        }
+        return getFields().get(field).toString();
+    }
+
+    /**
+     * Retrieve the context outputs field from the workitem.
+     * 
+     * @return field value
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getContextOutputs() {
+        return (Map<String, Object>) getFields().get(CONTEXT_OUTPUTS);
     }
 
     /**
@@ -381,7 +392,16 @@ public class MaestroWorker {
      * @param value value to apply to field
      */
     public void setField(String name, Object value) {
-	getFields().put(name, value);
+        getFields().put(name, value);
+    }
+
+    /**
+     * Sets the context outputs field to the specified value in the work item.
+     * 
+     * @param value context outputs map
+     */
+    public void setContextOutputs(Map<String, Object> value) {
+        getFields().put(CONTEXT_OUTPUTS, value);
     }
 
     /**
