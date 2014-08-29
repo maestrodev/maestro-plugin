@@ -38,6 +38,11 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <!--
+      Other json libraries that don't work
+      json-simple: converts big integers as int, throwing exception, need to convert to BigDecimal
+      gson: returns doubles instead of integers, so runIds are returned as 1.0 instead of 1
+    -->
     <dependency>
       <groupId>com.fasterxml.jackson.jr</groupId>
       <artifactId>jackson-jr-objects</artifactId>

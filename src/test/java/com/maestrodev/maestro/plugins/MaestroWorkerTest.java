@@ -24,29 +24,25 @@ public class MaestroWorkerTest {
 
     private MaestroWorker worker;
     private Map<String, Object> workitem;
+    private Map<String, Object> fields;
 
     @Before
     public void before() {
-        worker = new MaestroWorkerStub();
+        fields = new HashMap<String, Object>();
         workitem = new HashMap<String, Object>();
+        workitem.put("fields", fields);
+        worker = new MaestroWorkerStub();
+        worker.setWorkitem(workitem);
     }
 
     @Test
     public void testSetField() throws Exception {
-        Map<String, Object> fields = new HashMap<String, Object>();
-        workitem.put("fields", fields);
-        worker.setWorkitem(workitem);
-
         worker.setField("some field", "some value");
-
         assertEquals(worker.getField("some field"), "some value");
     }
 
     @Test
     public void testGetArrayField() throws Exception {
-        worker.setWorkitem(workitem);
-        workitem.put("fields", new HashMap<String, Object>());
-
         String f = "test";
 
         // edge cases: null, empty array
@@ -54,8 +50,7 @@ public class MaestroWorkerTest {
         assertNull(worker.getArrayField(String.class, f));
 
         worker.setField(f, JSON.std.arrayFrom("[]"));
-        assertEquals(Collections.emptyList(),
-                worker.getArrayField(String.class, f));
+        assertEquals(Collections.emptyList(), worker.getArrayField(String.class, f));
 
         // string array
         List<String> expected = Arrays.asList(new String[] { "a", "b", "c" });
@@ -74,13 +69,11 @@ public class MaestroWorkerTest {
 
         worker.setField(f, JSON.std.arrayFrom("[1.0, 2.0, 3.0]"));
         List<Double> actualDouble = worker.getArrayField(Double.class, f);
-        assertArrayEquals(new Double[] { 1.0, 2.0, 3.0 },
-                actualDouble.toArray());
+        assertArrayEquals(new Double[] { 1.0, 2.0, 3.0 }, actualDouble.toArray());
     }
 
     @Test
     public void testExceptionOnPerform() throws Exception {
-        workitem.put("fields", new HashMap<String, Object>());
         worker.perform("fail", workitem);
         assertTrue(
                 worker.getError(),
@@ -91,7 +84,6 @@ public class MaestroWorkerTest {
 
     @Test
     public void testPerform() throws Exception {
-        workitem.put("fields", new HashMap<String, Object>());
         worker.perform("test", workitem);
 
         String expected = "Executing plugin: com.maestrodev.maestro.plugins.MaestroWorkerTest$MaestroWorkerStub.test\n"
@@ -101,13 +93,11 @@ public class MaestroWorkerTest {
     }
 
     @Test
-    public void testParseBigDecimal() {
-        Map<String,Object> map = new HashMap<String, Object>();
-        Map<String,Object> fields = new HashMap<String, Object>();
+    public void testParseBigDecimal() throws Exception {
         fields.put("big", new BigInteger("16740918963672507888"));
-        map.put("fields", fields);
-        worker.perform("getError", map);
+        Map result = worker.perform("getError", workitem);
         assertNull(worker.getError());
+        assertEquals("{\"fields\":{\"big\":16740918963672507888}}", JSON.std.asString(result));
     }
 
     class MaestroWorkerStub extends MaestroWorker {
